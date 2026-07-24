@@ -1,0 +1,2658 @@
+<!DOCTYPE html>
+<!-- saved from url=(0072)https://webview.e2b.sh4.sandbox.cloudstudio.club/%E6%AD%8C%E5%8D%95.html -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工作歌单 v4.1</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-hover: #1c2331;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+    --accent: #58a6ff;
+    --accent-dim: #1f6feb;
+    --key-C: #58a6ff;
+    --key-G: #3fb950;
+    --key-Am: #d29922;
+    --key-D: #bc8cff;
+    --key-Em: #f85149;
+    --key-F: #39c5cf;
+    --key-Bm: #e3b341;
+
+  --key-A: #f778ba;
+  --key-E: #ff6b6b;
+  --key-Dm: #4ecdc4;
+
+    --key-other: #8b949e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 0;
+  }
+  .toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 5px 12px;
+  }
+  .toolbar-top {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1 1 auto;
+    min-width: 100px;
+    max-width: 320px;
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    padding: 6px 32px 6px 30px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box input:focus {
+    border-color: var(--accent);
+  }
+  .search-box .icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .search-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+    display: none;
+  }
+  .search-btn:hover {
+    color: var(--text);
+    background: rgba(255,255,255,0.06);
+  }
+  .search-btn.visible {
+    display: inline-block;
+  }
+  .top-controls { display: none; }
+  .btn {
+    padding: 5px 10px;
+    background: var(--accent-dim);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 12px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn.outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+  }
+  .btn.outline:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .table-wrap {
+    padding: 0 16px 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    position: sticky;
+    top: 0; /* JS动态设置 */
+    background: var(--surface);
+    z-index: 10;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dim);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { color: var(--text); }
+  thead th .sort-arrow { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+  thead th.sorted .sort-arrow { opacity: 1; color: var(--accent); }
+  tbody tr {
+    border-bottom: 1px solid #21262d;
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: var(--surface-hover); }
+  tbody td {
+    padding: 7px 12px;
+    vertical-align: middle;
+  }
+  .col-id { width: 50px; color: var(--text-dim); text-align: center; }
+  .col-name { font-weight: 500; }
+  .col-artist { color: var(--text-dim); }
+  .col-key { width: 80px; }
+  .col-male { width: 55px; text-align: center; font-size: 13px; color: var(--text-dim); }
+  .col-female { width: 55px; text-align: center; font-size: 13px; color: var(--text-dim); }
+  .col-bpm { width: 55px; text-align: center; font-size: 13px; color: var(--text-dim); }
+  .col-timesig { width: 65px; text-align: center; font-size: 13px; color: var(--text-dim); font-family: 'Consolas', 'Monaco', monospace; }
+  .key-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Consolas', 'Monaco', monospace;
+  }
+  .key-C { background: rgba(88,166,255,0.15); color: var(--key-C); border: 1px solid rgba(88,166,255,0.3); }
+  .key-G { background: rgba(63,185,80,0.15); color: var(--key-G); border: 1px solid rgba(63,185,80,0.3); }
+  .key-Am { background: rgba(210,153,34,0.15); color: var(--key-Am); border: 1px solid rgba(210,153,34,0.3); }
+  .key-D { background: rgba(188,140,255,0.15); color: var(--key-D); border: 1px solid rgba(188,140,255,0.3); }
+  .key-Em { background: rgba(248,81,73,0.15); color: var(--key-Em); border: 1px solid rgba(248,81,73,0.3); }
+  .key-F { background: rgba(57,197,207,0.15); color: var(--key-F); border: 1px solid rgba(57,197,207,0.3); }
+  .key-Bm { background: rgba(227,179,65,0.15); color: var(--key-Bm); border: 1px solid rgba(227,179,65,0.3); }
+  .key-other { background: rgba(139,148,158,0.1); color: var(--key-other); border: 1px solid rgba(139,148,158,0.2); }
+
+  .key-A { background: rgba(247,120,186,0.15); color: var(--key-A); border: 1px solid rgba(247,120,186,0.3); }
+  .key-E { background: rgba(255,107,107,0.15); color: var(--key-E); border: 1px solid rgba(255,107,107,0.3); }
+
+  .key-Db { background: rgba(88,166,255,0.2); color: #58a6ff; border: 1px solid rgba(88,166,255,0.4); }
+  .key-Eb { background: rgba(63,185,80,0.2); color: #3fb950; border: 1px solid rgba(63,185,80,0.4); }
+  .key-Ab { background: rgba(210,153,34,0.2); color: #d29922; border: 1px solid rgba(210,153,34,0.4); }
+  .key-Bb { background: rgba(188,140,255,0.2); color: #bc8cff; border: 1px solid rgba(188,140,255,0.4); }
+  .key-Gb { background: rgba(248,81,73,0.2); color: #f85149; border: 1px solid rgba(248,81,73,0.4); }
+  .key-B { background: rgba(57,197,207,0.2); color: #39c5cf; border: 1px solid rgba(57,197,207,0.4); }
+  .key-Dm { background: rgba(78,205,196,0.15); color: var(--key-Dm); border: 1px solid rgba(78,205,196,0.3); }
+
+  .empty-row {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-dim);
+  }
+  @media (max-width: 700px) {
+    .toolbar-top { flex-direction: column; align-items: stretch; }
+    .search-box { max-width: none; }
+    thead th { top: auto; }
+    .col-timesig { display: none; }
+  }
+
+  .song-row { cursor: pointer; }
+  .prog-toggle {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: 4px;
+    transition: transform 0.2s;
+  }
+  .prog-detail {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 7px 12px;
+  }
+  .prog-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .prog-label {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1px;
+  }
+  .prog-measures {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    gap: 0;
+    border-radius: 6px;
+    overflow: visible;
+    border: 1px solid rgba(88,166,255,0.2);
+    background: rgba(88,166,255,0.06);
+    margin-top: 1px;
+  }
+  .measure {
+    padding: 1px 4px;
+    border-right: 1px solid rgba(88,166,255,0.15);
+    border-bottom: 1px dashed rgba(63,185,80,0.3);
+    text-align: center;
+    display: flex;
+    align-items: stretch;
+  }
+  .beat {
+    flex: 1 1 auto;
+    min-width: max-content;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1px 3px;
+    white-space: nowrap;
+  }
+  .beat.has-chord .measure-num { color: var(--accent); }
+  /* 空拍休止标记 "-"：弱化显示，区别于实际和弦 */
+  .measure-chord.rest-mark {
+    color: rgba(139,148,158,0.5);
+    font-weight: 400;
+  }
+  .measure-num {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 1.5px;
+    line-height: 0.9;
+  }
+  .measure-num small {
+    font-size: 0.65em;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+  .measure-chord {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: #3fb950;
+    letter-spacing: 1px;
+    line-height: 0.9;
+    margin-top: 0;
+  }
+  .measure-chord small {
+    font-size: 0.7em;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+  .prog-num.none {
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px dashed rgba(255,255,255,0.15);
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .prog-empty {
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  .back-top-btn {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: rgba(88,166,255,0.12);
+    border: 1px solid rgba(88,166,255,0.25);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 5;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .back-top-btn:hover {
+    background: rgba(88,166,255,0.22);
+    border-color: var(--accent);
+  }
+  .ref-panel {
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .ref-panel.open {
+  }
+  .ref-panel-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: background 0.15s;
+  }
+  .ref-panel-toggle:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+  }
+  .ref-panel-toggle .arrow {
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  .ref-panel.open .ref-panel-toggle .arrow {
+    transform: rotate(90deg);
+  }
+  .ref-panel-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.25s ease;
+  }
+  .ref-panel.open .ref-panel-body {
+    max-height: 1200px;
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  /* ===== 和弦对照表：编辑模式（增加 / 排序和弦进行模块） ===== */
+  .ref-panel-actions {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 16px 0;
+    font-size: 12px;
+  }
+  .ref-panel.open .ref-panel-actions { display: flex; }
+  .ref-edit-btn {
+    padding: 3px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(255,255,255,0.04);
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .ref-edit-btn:hover { border-color: var(--accent); color: var(--text); }
+  .ref-edit-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .ref-edit-hint { color: var(--text-dim); }
+  /* 编辑模式下的和弦进行模块卡片 */
+  .ref-panel-body .prog-section.ref-edit {
+    flex: 0 0 auto;
+    min-width: 200px;
+    max-width: 260px;
+    background: rgba(88,166,255,0.06);
+    border: 1px solid rgba(88,166,255,0.28);
+    border-radius: 8px;
+    padding: 8px;
+    gap: 4px;
+  }
+  .ref-panel-body .prog-section.ref-edit .edit-chords { font-size: 14px; padding: 6px 8px; }
+  .ref-preview {
+    font-family: 'Consolas','Monaco', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+    word-break: break-all;
+    line-height: 1.5;
+  }
+  .ref-add { flex: 0 0 100%; margin-top: 2px; }
+  .ref-add .btn { font-size: 13px; }
+
+  /* ===== Tab 标签栏 ===== */
+
+  .tab-btn {
+    padding: 5px 12px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+  .tab-count {
+    background: rgba(88,166,255,0.15);
+    color: var(--accent);
+    font-size: 10px;
+    padding: 0px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+    min-width: 18px;
+    text-align: center;
+  }
+  .tab-btn:not(.active) .tab-count {
+    background: rgba(139,148,158,0.15);
+    color: var(--text-dim);
+  }
+
+  /* ===== 操作列（+/-） ===== */
+  .col-action { width: 50px; text-align: center; }
+  thead th.col-action { cursor: default; }
+  thead th.col-action:hover { color: var(--text-dim); }
+  .action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(88,166,255,0.1);
+  }
+  .action-btn.remove:hover {
+    border-color: #f85149;
+    color: #f85149;
+    background: rgba(248,81,73,0.1);
+  }
+  .action-btn.added {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(88,166,255,0.15);
+    cursor: default;
+  }
+  .action-btn.added:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(88,166,255,0.15);
+  }
+
+  /* 临时歌单空状态 */
+  .empty-temp {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+  }
+  .empty-temp .empty-icon {
+    font-size: 56px;
+    margin-bottom: 12px;
+    opacity: 0.35;
+  }
+  .empty-temp .empty-text {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .empty-temp .empty-hint {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+  .song-row.pinned-row {
+    background: rgba(88,166,255,0.06);
+  }
+  .song-row.pinned-row:hover {
+    background: rgba(88,166,255,0.12);
+  }
+  .pinned-tag {
+    display: inline-block;
+    font-size: 10px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    padding: 0 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .key-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    align-items: stretch;
+    margin-top: 4px;
+    padding-bottom: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .key-bar-label {
+    font-size: 14px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding-right: 6px;
+  }
+  .key-btn {
+    border-radius: 0;
+    border-left: none;
+  }
+  .key-btn:first-of-type {
+    border-left: 1px solid var(--border);
+    border-radius: 6px 0 0 6px;
+  }
+  .key-btn:last-of-type {
+    border-radius: 0 6px 6px 0;
+  }
+  .key-btn {
+    flex: 1 1 0;
+    padding: 6px 0;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s;
+    font-family: 'Consolas', 'Monaco', monospace;
+    text-align: center;
+    user-select: none;
+  }
+  .key-btn:hover {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.07);
+  }
+  .key-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 0 12px rgba(88,166,255,0.4);
+  }
+  .key-btn.key-orig {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  .key-btn .orig-tag {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-left: 3px;
+    font-weight: 400;
+    opacity: 0.8;
+  }
+  .key-btn.active .orig-tag {
+    color: #fff;
+    opacity: 0.85;
+  }
+  .section-note {
+    margin-top: 3px;
+  }
+  .section-note-input {
+    width: 100%;
+    padding: 5px 8px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 12px;
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    min-height: 28px;
+    box-sizing: border-box;
+  }
+  .section-note-input:focus {
+    border-color: var(--accent);
+    background: rgba(255,255,255,0.06);
+  }
+  .section-note-input::placeholder {
+    color: var(--text-dim);
+    opacity: 0.5;
+    font-size: 11px;
+  }
+  @media (max-width: 700px) {
+    .prog-detail { flex-direction: column; }
+    .prog-section { min-width: auto; }
+    .prog-measures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .measure:nth-child(2n) { border-right: none; }
+  }
+
+/* ===== 升级：节拍器 / 和弦提示 / 拖拽（精简版） ===== */
+.bpm-link { color:var(--accent); cursor:pointer; border-bottom:1px dashed var(--accent); }
+.bpm-link:hover { opacity:.8; }
+
+/* 拖拽排序 */
+.song-row.dragging { opacity:.4; }
+.song-row.drag-over { box-shadow: inset 0 2px 0 var(--accent); background: rgba(88,166,255,.10); }
+.song-row[draggable="true"] { cursor:grab; }
+.song-row[draggable="true"]:active { cursor:grabbing; }
+
+/* 节拍器 */
+.metro { position:fixed; right:18px; bottom:18px; width:244px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; z-index:200; box-shadow:0 12px 40px rgba(0,0,0,.5); }
+.metro-head { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text); margin-bottom:8px; }
+.metro-x { background:transparent; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; line-height:1; }
+.metro-x:hover { color:var(--text); }
+.metro-bpm { text-align:center; font-size:30px; font-weight:700; color:var(--accent); font-family:'Consolas','Monaco',monospace; }
+.metro-bpm small { font-size:12px; color:var(--text-dim); font-weight:400; }
+.metro input[type=range]{ width:100%; margin:8px 0; accent-color:var(--accent); }
+.metro-meter { margin:6px 0 4px; }
+.metro-meter-label { font-size:11px; color:var(--text-dim); margin-bottom:5px; line-height:1.5; }
+.metro-meter-row { display:flex; flex-direction:column; gap:6px; }
+#metroMeter { width:100%; padding:6px 10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:15px; font-family:'Consolas',monospace; text-align:center; outline:none; }
+#metroMeter:focus { border-color:var(--accent); }
+.metro-presets { display:flex; flex-wrap:wrap; gap:4px; }
+.metro-presets button { flex:1 1 30%; min-width:34px; padding:4px 0; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text-dim); font-size:11px; cursor:pointer; font-family:'Consolas',monospace; transition:all .15s; }
+.metro-presets button:hover { border-color:var(--accent); color:var(--text); }
+.metro-presets button.active { background:var(--accent-dim); border-color:var(--accent); color:#fff; }
+.metro-ctrl { display:flex; gap:8px; margin-top:8px; }
+.metro-ctrl button { flex:1; padding:7px; border-radius:8px; border:1px solid var(--border); background:var(--accent-dim); color:#fff; cursor:pointer; font-size:13px; }
+.metro-ctrl button.outline { background:transparent; color:var(--text-dim); }
+.metro-ctrl button:hover { opacity:.85; }
+.metro-beat { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:10px; min-height:16px; }
+.bdot { width:12px; height:12px; border-radius:50%; background:var(--text-dim); opacity:.4; transition:transform .08s, background .08s, opacity .08s; }
+.bdot.b-strong { background:var(--accent); width:15px; height:15px; opacity:.95; }
+.bdot.b-mid { background:#d29922; opacity:.7; }
+.bdot.cur { transform:scale(1.5); opacity:1; box-shadow:0 0 10px var(--accent); }
+
+/* 导出修改弹窗 */
+.export-mask { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:500; display:none; align-items:center; justify-content:center; padding:20px; }
+.export-mask.open { display:flex; }
+.export-box { width:100%; max-width:640px; max-height:86vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.55); overflow:hidden; }
+.export-head { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--border); font-size:15px; font-weight:600; color:var(--text); }
+.export-x { background:transparent; border:none; color:var(--text-dim); font-size:22px; cursor:pointer; line-height:1; }
+.export-x:hover { color:var(--text); }
+.export-hint { padding:10px 18px 0; font-size:12px; color:var(--text-dim); line-height:1.6; }
+.export-hint b { color:var(--accent); }
+.export-ta { flex:1; min-height:200px; margin:10px 18px; padding:12px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:'Consolas','Monaco',monospace; font-size:12px; line-height:1.55; resize:none; outline:none; white-space:pre; overflow:auto; }
+.export-ta:focus { border-color:var(--accent); }
+.export-actions { display:flex; gap:10px; padding:0 18px 16px; }
+.export-actions .btn { flex:1; padding:9px; border-radius:9px; font-size:14px; cursor:pointer; }
+.export-actions .btn.primary { background:var(--accent-dim); color:#fff; border:1px solid var(--accent); }
+.export-actions .btn.outline { background:transparent; color:var(--text); border:1px solid var(--border); }
+.export-actions .btn:hover { opacity:.88; }
+.export-actions .btn.ok { background:#238636; border-color:#238636; color:#fff; }
+
+/* 和弦悬浮提示 */
+.chord-tip { position:fixed; display:none; z-index:300; background:var(--surface); border:1px solid var(--accent); border-radius:10px; padding:8px 12px; box-shadow:0 8px 28px rgba(0,0,0,.5); pointer-events:none; max-width:190px; }
+.ct-name { font-size:16px; font-weight:700; color:var(--accent); font-family:'Consolas','Monaco',monospace; }
+.ct-label { font-size:11px; color:var(--text-dim); margin:2px 0; }
+.ct-notes { font-size:12px; color:var(--text); letter-spacing:1px; }
+
+/* 跟随浏览器配色（浅色模式） */
+@media (prefers-color-scheme: light) {
+  :root { --bg:#f4f6f8; --surface:#ffffff; --surface-hover:#eef2f6; --border:#d8dee4; --text:#1f2328; --text-dim:#626b75; --accent:#1f6feb; --accent-dim:#1f6feb; }
+  .ref-panel { background:#fafbfc; }
+  .search-box input, .section-note-input { background:#fff; }
+  .key-btn { background:rgba(0,0,0,.03); color:var(--text); }
+  .measure { background:rgba(31,111,235,.05); }
+}
+
+/* ===== iPad Air 5（10.9" 1640×2360）视奏优化 ===== */
+/* 横屏（≤1180px）：和弦展开页最大化 */
+@media (max-width: 1180px) {
+  .toolbar { padding: 6px 14px; }
+  .table-wrap { padding: 0 16px 36px; max-width: none; }
+
+  /* 歌单列表：行高加大，手指触控友好 */
+  tbody td { padding: 10px 14px; }
+  thead th { padding: 10px 14px; font-size: 13px; }
+  .col-id { width: 56px; }
+  .col-key { width: 90px; }
+  .key-badge { padding: 3px 12px; font-size: 14px; }
+
+  /* 和弦展开页 */
+  .prog-detail { padding: 10px 16px; gap: 14px; }
+  .prog-section { min-width: 140px; }
+  .prog-label { font-size: 15px; font-weight: 700; }
+  .measure { padding: 2px 10px; }
+  .measure-num { font-size: 22px; }
+  .measure-chord { font-size: 20px; }
+  .measure-chord small { font-size: 0.72em; }
+
+  /* 小节网格：自适应，每个小节最小 140px */
+  .prog-measures { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+
+  /* 详情栏 */
+  .detail-bar { padding: 6px 12px; }
+  .detail-name { font-size: 22px; }
+  .dm-chip { font-size: 15px; padding: 4px 14px; }
+  .detail-close { font-size: 15px; padding: 8px 16px; }
+  .detail-body { padding: 12px 18px 32px; }
+}
+/* 竖屏（≤820px）：iPad Air 5 竖屏视奏模式 */
+@media (max-width: 820px) {
+  .toolbar-top { flex-wrap: wrap; gap: 4px; }
+  .search-box { min-width: 120px; }
+  .key-bar { gap: 3px; margin-top: 4px; }
+  .key-btn { padding: 8px 0; font-size: 16px; }
+
+  /* 歌单列表竖屏 */
+  tbody td { padding: 8px 10px; }
+  thead th { padding: 8px 10px; }
+  table { font-size: 15px; }
+
+  /* 和弦展开：竖屏视奏核心——尽可能大 */
+  .prog-detail { padding: 8px 10px; gap: 16px; }
+  .prog-section { min-width: auto; }
+  .prog-label { font-size: 16px; font-weight: 700; }
+  .prog-measures { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .measure-num { font-size: 26px; letter-spacing: 2px; }
+  .measure-chord { font-size: 24px; letter-spacing: 1.5px; }
+  .measure { padding: 3px 10px; }
+  .beat { padding: 2px 4px; }
+  .measure-num small { font-size: 0.62em; }
+  .measure-chord small { font-size: 0.7em; }
+
+  /* 详情栏竖屏：单行极致紧凑 */
+  .detail-bar { padding: 3px 6px; gap: 4px; flex-wrap: nowrap; align-items: center; }
+  .detail-title { flex-direction: row; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; overflow: hidden; }
+  .detail-name { font-size: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .detail-meta { gap: 3px; flex-wrap: nowrap; }
+  .dm-chip { font-size: 11px; padding: 2px 6px; }
+  .dm-chip i { font-size: 10px; }
+  .dm-chip b { font-size: 12px; font-weight: 700; }
+  .detail-actions { gap: 3px; flex-shrink: 0; }
+  .detail-actions .btn { padding: 3px 6px; font-size: 12px; border-radius: 5px; }
+  .detail-close { font-size: 10px; padding: 3px 6px; }
+  .detail-body { padding: 8px 10px 60px; }
+  .detail-body .prog-label { font-size: 20px; }
+  .detail-body .prog-measures { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+  .detail-body .measure-num { font-size: 36px; }
+  .detail-body .measure-chord { font-size: 34px; }
+
+  .back-top-btn { padding: 5px 12px; font-size: 13px; }
+}
+
+/* ===== 编辑模式（直接修改字母和弦） ===== */
+.edit-chords {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  line-height: 1.7;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(88,166,255,0.45);
+  background: rgba(88,166,255,0.1);
+  color: inherit;
+  resize: vertical;
+}
+.edit-chords:focus {
+  outline: none;
+  border-color: #3fb950;
+  background: rgba(63,185,80,0.12);
+}
+.prog-section.edit { gap: 4px; }
+/* 编辑模式下备注区是 .prog-section.edit 的并列节点（直接位于 .prog-detail flex 容器中）：
+   让它占满整行，宽度与上方和弦输入框(.edit-chords)保持一致；并抵消部分容器 gap 使其贴近所属模块 */
+.prog-detail > .section-note { flex: 0 0 100%; max-width: 100%; margin-top: -4px; }
+.sec-edit-head { display: flex; align-items: center; gap: 6px; }
+.section-label-input {
+  flex: 1 1 auto;
+  width: auto;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  background: rgba(88,166,255,0.1);
+  border: 1px solid rgba(88,166,255,0.4);
+  border-radius: 6px;
+  padding: 3px 8px;
+  outline: none;
+}
+.section-label-input:focus { border-color: #3fb950; background: rgba(63,185,80,0.12); }
+/* 拖拽排序手柄 */
+.section-drag {
+  flex: 0 0 auto;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: grab;
+  padding: 2px 6px;
+  border-radius: 4px;
+  user-select: none;
+  line-height: 1;
+}
+.section-drag:active { cursor: grabbing; }
+.section-drag:hover { color: var(--text); background: rgba(255,255,255,0.08); }
+.prog-section.edit { position: relative; transition: transform 0.15s, box-shadow 0.15s; }
+.prog-section.drag-over {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 0 #3fb950;
+}
+.prog-section.dragging { opacity: 0.4; }
+.section-del {
+  flex: 0 0 auto;
+  background: transparent;
+  border: 1px solid rgba(248,81,73,0.4);
+  color: #f85149;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.section-del:hover { background: rgba(248,81,73,0.15); }
+.add-section { margin-top: 4px; }
+.add-section .btn { font-size: 13px; }
+.edit-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(88,166,255,0.3);
+}
+.edit-hint { font-size: 12px; opacity: 0.65; }
+.btn.primary { background: #238636; border-color: #238636; color: #fff; }
+.btn.primary:hover { background: #2ea043; }
+.btn.active { background: rgba(63,185,80,0.18); border-color: #3fb950; color: #3fb950; font-weight: 600; }
+/* iPad：编辑框放大，便于触控输入 */
+@media (max-width: 1080px) {
+  .edit-chords { font-size: 18px; padding: 10px 12px; }
+}
+@media (max-width: 820px) {
+  .edit-chords { font-size: 19px; padding: 12px; }
+  .edit-actions { gap: 8px; }
+}
+
+/* ===== 展开和弦：铺满锁定行以下的全屏详情区 ===== */
+.detail-view { display: none; }
+.detail-view.open {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  top: 0;                 /* 实际 top 由 JS 设为锁定行底部 */
+  z-index: 60;
+  background: var(--bg);
+}
+
+  .detail-bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 12px;
+    border-bottom: 1px solid rgba(88,166,255,0.18);
+    background: var(--bg);
+    flex-wrap: nowrap;
+  }
+  .detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+  .detail-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    overflow: hidden;
+    flex: 1 1 auto;
+  }
+  .detail-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  .detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
+  }
+  .dm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 16px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    padding: 3px 11px;
+    white-space: nowrap;
+  }
+  .dm-chip i { font-style: normal; opacity: 0.7; }
+  .dm-chip b {
+    font-weight: 600;
+    color: var(--accent);
+    font-family: 'Consolas', 'Monaco', monospace;
+  }
+  /* 编辑模式：元信息可输入 */
+  .detail-meta.edit-meta { gap: 10px; align-items: center; flex-wrap: wrap; }
+  .dm-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--text-dim);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+  .dm-edit label { font-style: normal; opacity: 0.7; white-space: nowrap; }
+  .dm-edit select, .dm-edit input {
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-size: 13px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    min-width: 42px;
+  }
+  .dm-edit input#meta-bpm-1, .dm-edit input#meta-ts-1 { min-width: 60px; }
+  .dm-edit select:focus, .dm-edit input:focus { border-color: var(--accent); outline: none; }
+  .detail-close {
+    flex: 0 0 auto;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(248,81,73,0.5);
+    background: rgba(248,81,73,0.12);
+    color: #f85149;
+    cursor: pointer;
+  }
+  .detail-close:hover { background: rgba(248,81,73,0.22); }
+  .detail-body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 12px 48px;
+  }
+  /* 详情区内和弦：每段（主歌/副歌…）独立一行，视奏大字体 */
+  .detail-body .prog-detail { padding: 6px 0; gap: 0; }
+  .detail-body .prog-section { gap: 6px; }
+  .detail-body .prog-label { font-size: 18px; font-weight: 700; }
+  .detail-body .prog-measures { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .detail-body .measure { padding: 4px 12px; }
+  .detail-body .measure-num { font-size: 30px; }
+  .detail-body .measure-chord { font-size: 28px; }
+
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="toolbar-top">
+    <button class="tab-btn active" id="tab-main" onclick="switchTab(&#39;main&#39;)">
+      <span>📋 工作歌单</span>
+      <span class="tab-count" id="count-main">305</span>
+    </button>
+    <button class="tab-btn" id="tab-temp" onclick="switchTab(&#39;temp&#39;)">
+      <span>⭐ 临时歌单</span>
+      <span class="tab-count" id="count-temp">8</span>
+    </button>
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input type="text" id="search" placeholder="搜索…" autocomplete="off">
+      <button class="search-btn" id="searchClear" title="清除" onclick="clearSearch()">×</button>
+    </div>
+    <button class="btn outline" title="节拍器" onclick="toggleMetronome()">🎵</button>
+    <button class="btn outline" title="导出修改" onclick="openExportModal()">📤</button>
+  </div>
+  <div class="key-bar">
+    <span class="key-bar-label">🎼</span>
+    <button class="key-btn active" data-key="C" data-label="C" onclick="changeTransposeKey(&#39;C&#39;, this)">C</button>
+    <button class="key-btn" data-key="Db" data-label="Db" onclick="changeTransposeKey(&#39;Db&#39;, this)">D♭</button>
+    <button class="key-btn" data-key="D" data-label="D" onclick="changeTransposeKey(&#39;D&#39;, this)">D</button>
+    <button class="key-btn" data-key="Eb" data-label="Eb" onclick="changeTransposeKey(&#39;Eb&#39;, this)">E♭</button>
+    <button class="key-btn" data-key="E" data-label="E" onclick="changeTransposeKey(&#39;E&#39;, this)">E</button>
+    <button class="key-btn" data-key="F" data-label="F" onclick="changeTransposeKey(&#39;F&#39;, this)">F</button>
+    <button class="key-btn" data-key="Gb" data-label="Gb" onclick="changeTransposeKey(&#39;Gb&#39;, this)">G♭</button>
+    <button class="key-btn" data-key="G" data-label="G" onclick="changeTransposeKey(&#39;G&#39;, this)">G</button>
+    <button class="key-btn" data-key="Ab" data-label="Ab" onclick="changeTransposeKey(&#39;Ab&#39;, this)">A♭</button>
+    <button class="key-btn" data-key="A" data-label="A" onclick="changeTransposeKey(&#39;A&#39;, this)">A</button>
+    <button class="key-btn" data-key="Bb" data-label="Bb" onclick="changeTransposeKey(&#39;Bb&#39;, this)">B♭</button>
+    <button class="key-btn" data-key="B" data-label="B" onclick="changeTransposeKey(&#39;B&#39;, this)">B</button>
+  </div>
+  <div class="ref-panel" id="refPanel">
+    <div class="ref-panel-toggle" onclick="toggleRefPanel()">
+      <span class="arrow">▶</span>
+      <span>📖 和弦对照表（常用进行 · 随转调同步）</span>
+    </div>
+    <div class="ref-panel-actions" id="refPanelActions">
+      <button class="ref-edit-btn" id="refEditBtn" onclick="toggleRefEditMode(event)">✏️ 编辑</button>
+      <span class="ref-edit-hint" id="refEditHint"></span>
+    </div>
+    <div class="ref-panel-body" id="refPanelBody"><div class="prog-section"><span class="prog-label">顺阶七级</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">3</div><div class="measure-chord">E<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">b1<small>dim</small></div><div class="measure-chord">B<small>dim</small></div></div></div></div></div><div class="prog-section"><span class="prog-label">流行卡农进行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">3</div><div class="measure-chord">E<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div></div></div><div class="prog-section"><span class="prog-label">万能抒情变体</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">3</div><div class="measure-chord">E<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div></div></div><div class="prog-section"><span class="prog-label">标准 456 进行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div></div></div><div class="prog-section"><span class="prog-label">延伸版 4561 进行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div></div></div><div class="prog-section"><span class="prog-label">4536 变体（斜线和弦）</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5/4</div><div class="measure-chord">G/F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">3</div><div class="measure-chord">E<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div></div></div><div class="prog-section"><span class="prog-label">五度循环进行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div></div></div><div class="prog-section"><span class="prog-label">小调顺阶下行 1</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">3</div><div class="measure-chord">E<small>m</small></div></div></div></div></div><div class="prog-section"><span class="prog-label">小调顺阶下行 2</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div></div></div><div class="prog-section"><span class="prog-label">现代流行、欧美影响</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div></div></div><div class="prog-section"><span class="prog-label">老派流行、校园民谣</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div></div></div><div class="prog-section"><span class="prog-label">爵士味、经典流行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div></div></div><div class="prog-section"><span class="prog-label">副歌常见</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div></div></div><div class="prog-section"><span class="prog-label">最传统进行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div></div></div><div class="prog-section"><span class="prog-label">摇滚、流行情绪推进</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div></div></div><div class="prog-section"><span class="prog-label">渐进情绪</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">3</div><div class="measure-chord">E<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div></div></div><div class="prog-section"><span class="prog-label">终止进行</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">2</div><div class="measure-chord">D<small>m</small></div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div></div></div></div></div>
+  </div>
+</div>
+<div class="table-wrap">
+  <table id="table">
+    <thead>
+      <tr>
+        <th class="col-id sorted" onclick="sortBy(&#39;id&#39;)" style="top: 116px;"># <span class="sort-arrow">▲</span></th>
+        <th onclick="sortBy(&#39;name&#39;)" style="top: 116px;">歌名 <span class="sort-arrow"></span></th>
+        <th onclick="sortBy(&#39;artist&#39;)" style="top: 116px;">原唱 <span class="sort-arrow"></span></th>
+        <th class="col-key" onclick="sortBy(&#39;key&#39;)" style="top: 116px;">原调 <span class="sort-arrow"></span></th>
+        <th class="col-male" onclick="sortBy(&#39;maleKey&#39;)" style="top: 116px;">男调 <span class="sort-arrow"></span></th>
+        <th class="col-female" onclick="sortBy(&#39;femaleKey&#39;)" style="top: 116px;">女调 <span class="sort-arrow"></span></th>
+        <th class="col-bpm" onclick="sortBy(&#39;bpm&#39;)" style="top: 116px;">速度 <span class="sort-arrow"></span></th>
+        <th class="col-timesig" onclick="sortBy(&#39;timeSig&#39;)" style="top: 116px;">拍号 <span class="sort-arrow"></span></th>
+        <th class="col-action" style="top: 116px;">操作</th>
+      </tr>
+    </thead>
+    <tbody id="tbody">
+    <tr class="song-row" data-id="229" draggable="true" onclick="toggleProg(229)">
+      <td class="col-id">1</td>
+      <td class="col-name">真的爱你 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">Beyond</td>
+      <td class="col-key"><span class="key-badge key-C">C</span></td>
+      <td class="col-male">C</td>
+      <td class="col-female">F</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(82)">82</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(229)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="227" draggable="true" onclick="toggleProg(227)">
+      <td class="col-id">2</td>
+      <td class="col-name">海阔天空 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">Beyond</td>
+      <td class="col-key"><span class="key-badge key-F">F</span></td>
+      <td class="col-male">E</td>
+      <td class="col-female">B</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(77)">77</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(227)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="228" draggable="true" onclick="toggleProg(228)">
+      <td class="col-id">3</td>
+      <td class="col-name">光辉岁月 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">Beyond</td>
+      <td class="col-key"><span class="key-badge key-E">E</span></td>
+      <td class="col-male">E</td>
+      <td class="col-female">A</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(75)">75</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(228)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="230" draggable="true" onclick="toggleProg(230)">
+      <td class="col-id">4</td>
+      <td class="col-name">喜欢你 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">Beyond</td>
+      <td class="col-key"><span class="key-badge key-C">C</span></td>
+      <td class="col-male">C</td>
+      <td class="col-female">F</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(76)">76</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(230)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="231" draggable="true" onclick="toggleProg(231)">
+      <td class="col-id">5</td>
+      <td class="col-name">不再犹豫 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">Beyond</td>
+      <td class="col-key"><span class="key-badge key-G">G</span></td>
+      <td class="col-male">G</td>
+      <td class="col-female">F</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(134)">134</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(231)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="304" draggable="true" onclick="toggleProg(304)">
+      <td class="col-id">6</td>
+      <td class="col-name">后来 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">刘若英</td>
+      <td class="col-key"><span class="key-badge key-Eb">Eb</span></td>
+      <td class="col-male">Eb</td>
+      <td class="col-female">Eb</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(76)">76</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(304)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="305" draggable="true" onclick="toggleProg(305)">
+      <td class="col-id">7</td>
+      <td class="col-name">情人 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">Beyond</td>
+      <td class="col-key"><span class="key-badge key-C">C</span></td>
+      <td class="col-male">C</td>
+      <td class="col-female">F</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(73)">73</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(305)">−</button></td>
+    </tr>
+    <tr class="song-row" data-id="306" draggable="true" onclick="toggleProg(306)">
+      <td class="col-id">8</td>
+      <td class="col-name">李白 <span class="prog-toggle">▶</span></td>
+      <td class="col-artist">李荣浩</td>
+      <td class="col-key"><span class="key-badge key-C">C</span></td>
+      <td class="col-male">C</td>
+      <td class="col-female">F</td>
+      <td class="col-bpm"><span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(115)">115</span></td>
+      <td class="col-timesig">4/4</td>
+      <td class="col-action"><button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(306)">−</button></td>
+    </tr></tbody>
+  </table>
+</div>
+
+<!-- 展开和弦：铺满锁定行以下的全屏详情区（每次仅一首） -->
+<div class="detail-view" id="detailView" style="top: 116px;">
+  <div class="detail-bar">
+    <div class="detail-title" id="detailTitle"><span class="detail-name">真的爱你</span><span class="detail-meta"><span class="dm-chip"><i>原调</i><b>C</b></span><span class="dm-chip"><i>男调</i><b>C</b></span><span class="dm-chip"><i>女调</i><b>F</b></span><span class="dm-chip"><i>速度</i><b>82</b></span><span class="dm-chip"><i>拍号</i><b>4/4</b></span></span></div>
+    <div class="detail-actions">
+      <button class="btn outline" id="prevSong" title="上一首" onclick="navigateSong(-1)">◀ 上一首</button>
+      <button class="btn outline" id="nextSong" title="下一首" onclick="navigateSong(1)">下一首 ▶</button>
+      <button class="btn outline" id="editToggle" title="编辑：修改字母和弦、模块名称，或新增模块，保存后自动推导级数">✏️ 编辑</button>
+      <button class="btn outline" id="editCancel" title="取消编辑" onclick="toggleEditMode()" style="display: none;">✕ 取消</button>
+      <button class="detail-close" onclick="closeDetail()">✕ 关闭</button>
+    </div>
+  </div>
+  <div class="detail-body" id="detailBody"><div class="prog-detail"><div class="prog-section"><span class="prog-label">前奏 solo</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div></div><div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-229-i" placeholder="前奏型" oninput="autoGrow(this);saveSectionNote(229,&#39;i&#39;,this.value)" rows="1" style="height: 28px;">SOLO</textarea></div></div><div class="prog-section"><span class="prog-label">主歌 Verse</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div></div><div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-229-v" placeholder="主歌伴奏" oninput="autoGrow(this);saveSectionNote(229,&#39;v&#39;,this.value)" rows="1" style="height: 28px;">分解</textarea></div></div><div class="prog-section"><span class="prog-label">预副歌 Pre-Chorus</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div></div><div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-229-p" placeholder="渐强" oninput="autoGrow(this);saveSectionNote(229,&#39;p&#39;,this.value)" rows="1" style="height: 28px;"></textarea></div></div><div class="prog-section"><span class="prog-label">副歌 Chorus</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div></div><div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-229-c" placeholder="副歌加强" oninput="autoGrow(this);saveSectionNote(229,&#39;c&#39;,this.value)" rows="1" style="height: 28px;"></textarea></div></div><div class="prog-section"><span class="prog-label">solo</span><div class="prog-measures"><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">6</div><div class="measure-chord">A<small>m</small></div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">4</div><div class="measure-chord">F</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat has-chord"><div class="measure-num">5</div><div class="measure-chord">G</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div><div class="measure"><div class="beat has-chord"><div class="measure-num">1</div><div class="measure-chord">C</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div><div class="beat rest"><div class="measure-chord rest-mark">-</div></div></div></div><div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-229-b" placeholder="间奏" oninput="autoGrow(this);saveSectionNote(229,&#39;b&#39;,this.value)" rows="1" style="height: 28px;"></textarea></div></div></div></div>
+</div>
+
+<div class="metro" id="metro" style="display:none;">
+  <div class="metro-head"><span>🎵 节拍器</span><button class="metro-x" onclick="toggleMetronome()">×</button></div>
+  <div class="metro-bpm"><span id="metroBpmVal">82</span> <small>BPM</small></div>
+  <input type="range" id="metroRange" min="40" max="240" value="80" oninput="setMetroBpm(this.value)">
+  <div class="metro-meter">
+    <div class="metro-meter-label">拍号（可自由输入，如 4/4 · 3/4 · 6/8 · 5/4 · 7/8）</div>
+    <div class="metro-meter-row">
+      <input type="text" id="metroMeter" value="4/4" maxlength="5" inputmode="numeric" oninput="setMeter(this.value)">
+      <div class="metro-presets">
+        <button onclick="setMeter(&#39;4/4&#39;)" class="active">4/4</button>
+        <button onclick="setMeter(&#39;3/4&#39;)">3/4</button>
+        <button onclick="setMeter(&#39;2/4&#39;)">2/4</button>
+        <button onclick="setMeter(&#39;6/8&#39;)">6/8</button>
+        <button onclick="setMeter(&#39;5/4&#39;)">5/4</button>
+        <button onclick="setMeter(&#39;7/8&#39;)">7/8</button>
+      </div>
+    </div>
+  </div>
+  <div class="metro-ctrl">
+    <button id="metroPlay" onclick="metroToggle()">▶ 开始</button>
+    <button class="outline" onclick="metroTap()">点按测速</button>
+  </div>
+  <div class="metro-beat" id="metroBeat"><span class="bdot b-strong"></span><span class="bdot b-weak"></span><span class="bdot b-weak"></span><span class="bdot b-weak"></span></div>
+</div>
+<div id="chordTip" class="chord-tip"></div>
+
+<div class="export-mask" id="exportMask" onclick="if(event.target===this)closeExportModal()">
+  <div class="export-box">
+    <div class="export-head"><span>📤 导出修改指令</span><button class="export-x" onclick="closeExportModal()">×</button></div>
+    <div class="export-hint" id="exportHint"></div>
+    <textarea class="export-ta" id="exportTa" readonly="" spellcheck="false"></textarea>
+    <div class="export-actions">
+      <button class="btn primary" id="exportCopyBtn" onclick="copyExport()">📋 复制文本</button>
+      <button class="btn outline" onclick="downloadExport()">💾 下载 txt</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== 304首歌曲数据 ========================
+const songs = [{"id":1,"name":"月亮代表我的心","artist":"邓丽君","key":"Db","maleKey":"Ab","femaleKey":"Db","bpm":"","timeSig":""},{"id":2,"name":"甜蜜蜜","artist":"邓丽君","key":"F","maleKey":"","femaleKey":"","bpm":""},{"id":3,"name":"我只在乎你","artist":"邓丽君","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":4,"name":"小城故事","artist":"邓丽君","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":5,"name":"恰似你的温柔","artist":"蔡琴","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":6,"name":"读你","artist":"蔡琴","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":7,"name":"你的眼神","artist":"蔡琴","key":"F","maleKey":"","femaleKey":"","bpm":""},{"id":8,"name":"被遗忘的时光","artist":"蔡琴","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":9,"name":"一场游戏一场梦","artist":"王杰","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":10,"name":"安妮","artist":"王杰","key":"Bm","maleKey":"","femaleKey":"","bpm":""},{"id":11,"name":"忘情水","artist":"刘德华","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":12,"name":"谢谢你的爱","artist":"刘德华","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":13,"name":"冰雨","artist":"刘德华","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":14,"name":"来生缘","artist":"刘德华","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":15,"name":"吻别","artist":"张学友","key":"Gb","maleKey":"","femaleKey":"","bpm":""},{"id":16,"name":"祝福","artist":"张学友","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":17,"name":"一千个伤心的理由","artist":"张学友","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":18,"name":"大海","artist":"张雨生","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":19,"name":"我的未来不是梦","artist":"张雨生","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":20,"name":"天天想你","artist":"张雨生","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":21,"name":"再回首","artist":"姜育恒","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":22,"name":"驿动的心","artist":"姜育恒","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":23,"name":"大约在冬季","artist":"齐秦","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":24,"name":"夜夜夜夜","artist":"齐秦","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":25,"name":"冬季到台北来看雨","artist":"孟庭苇","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":26,"name":"风中有朵雨做的云","artist":"孟庭苇","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":27,"name":"野百合也有春天","artist":"潘越云","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":28,"name":"潇洒走一回","artist":"叶倩文","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":29,"name":"光阴的故事","artist":"罗大佑","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":30,"name":"恋曲1990","artist":"罗大佑","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":31,"name":"暗香","artist":"沙宝亮","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":32,"name":"遇见","artist":"孙燕姿","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":33,"name":"我怀念的","artist":"孙燕姿","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":34,"name":"天黑黑","artist":"孙燕姿","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":35,"name":"绿光","artist":"孙燕姿","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":36,"name":"晴天","artist":"周杰伦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":37,"name":"七里香","artist":"周杰伦","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":38,"name":"稻香","artist":"周杰伦","key":"A","maleKey":"","femaleKey":"","bpm":""},{"id":39,"name":"简单爱","artist":"周杰伦","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":40,"name":"安静","artist":"周杰伦","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":41,"name":"轨迹","artist":"周杰伦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":42,"name":"发如雪","artist":"周杰伦","key":"B","maleKey":"","femaleKey":"","bpm":""},{"id":43,"name":"菊花台","artist":"周杰伦","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":44,"name":"青花瓷","artist":"周杰伦","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":45,"name":"说好的幸福呢","artist":"周杰伦","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":46,"name":"倒带","artist":"蔡依林","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":47,"name":"说爱你","artist":"蔡依林","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":48,"name":"日不落","artist":"蔡依林","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":49,"name":"勇气","artist":"梁静茹","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":50,"name":"宁夏","artist":"梁静茹","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":51,"name":"暖暖","artist":"梁静茹","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":52,"name":"可惜不是你","artist":"梁静茹","key":"Gb","maleKey":"","femaleKey":"","bpm":""},{"id":53,"name":"会呼吸的痛","artist":"梁静茹","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":54,"name":"分手快乐","artist":"梁静茹","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":55,"name":"燕尾蝶","artist":"梁静茹","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":56,"name":"恋爱ing","artist":"五月天","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":57,"name":"知足","artist":"五月天","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":58,"name":"温柔","artist":"五月天","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":59,"name":"倔强","artist":"五月天","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":60,"name":"突然好想你","artist":"五月天","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":61,"name":"演员","artist":"薛之谦","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":62,"name":"认真的雪","artist":"薛之谦","key":"Db","maleKey":"","femaleKey":"","bpm":""},{"id":63,"name":"丑八怪","artist":"薛之谦","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":64,"name":"你还要我怎样","artist":"薛之谦","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":65,"name":"刚刚好","artist":"薛之谦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":66,"name":"默","artist":"那英","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":67,"name":"三寸天堂","artist":"胡歌","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":68,"name":"时间煮雨","artist":"郁可唯","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":69,"name":"年轮","artist":"张碧晨","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":70,"name":"凉凉","artist":"张碧晨/杨宗纬","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":71,"name":"告白气球","artist":"周杰伦","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":72,"name":"等你下课","artist":"周杰伦","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":73,"name":"说好不哭","artist":"周杰伦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":74,"name":"Mojito","artist":"周杰伦","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":75,"name":"平凡之路","artist":"朴树","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":76,"name":"那些花儿","artist":"朴树","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":77,"name":"生如夏花","artist":"朴树","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":78,"name":"隐形的翅膀","artist":"张韶涵","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":79,"name":"淋雨一直走","artist":"张韶涵","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":80,"name":"欧若拉","artist":"张韶涵","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":81,"name":"画心","artist":"张靓颖","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":82,"name":"如果这就是爱情","artist":"张靓颖","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":83,"name":"终于等到你","artist":"张靓颖","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":84,"name":"慢慢喜欢你","artist":"莫文蔚","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":85,"name":"盛夏的果实","artist":"莫文蔚","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":86,"name":"他不爱我","artist":"莫文蔚","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":87,"name":"红豆","artist":"王菲","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":88,"name":"我愿意","artist":"王菲","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":89,"name":"流年","artist":"王菲","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":90,"name":"匆匆那年","artist":"王菲","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":91,"name":"同桌的你","artist":"老狼","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":92,"name":"睡在我上铺的兄弟","artist":"老狼","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":93,"name":"模范情书","artist":"老狼","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":94,"name":"虎口脱险","artist":"老狼","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":95,"name":"青春","artist":"沈庆","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":96,"name":"寂寞是因为思念谁","artist":"沈庆","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":97,"name":"校园的早晨","artist":"王洁实","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":98,"name":"南方姑娘","artist":"赵雷","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":99,"name":"成都","artist":"赵雷","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":100,"name":"画","artist":"赵雷","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":101,"name":"理想","artist":"赵雷","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":102,"name":"鼓楼","artist":"赵雷","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":103,"name":"理想三旬","artist":"陈鸿宇","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":104,"name":"途中","artist":"陈鸿宇","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":105,"name":"斑马斑马","artist":"宋冬野","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":106,"name":"董小姐","artist":"宋冬野","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":107,"name":"安和桥","artist":"宋冬野","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":108,"name":"鸽子","artist":"宋冬野","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":109,"name":"莉莉安","artist":"宋冬野","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":110,"name":"傲寒","artist":"马頔","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":111,"name":"南山南","artist":"马頔","key":"B","maleKey":"","femaleKey":"","bpm":""},{"id":112,"name":"关于郑州的记忆","artist":"李志","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":113,"name":"天空之城","artist":"李志","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":114,"name":"山阴路的夏天","artist":"李志","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":115,"name":"热河","artist":"李志","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":116,"name":"椿","artist":"沈以诚","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":117,"name":"你的样子","artist":"罗大佑","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":118,"name":"外婆的澎湖湾","artist":"潘安邦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":119,"name":"乡间的小路","artist":"齐豫","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":120,"name":"白桦林","artist":"朴树","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":121,"name":"广岛之恋","artist":"莫文蔚","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":122,"name":"当爱已成往事","artist":"林忆莲/李宗盛","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":123,"name":"你是我心内的一首歌","artist":"王力宏/Selina","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":124,"name":"选择","artist":"叶倩文/林子祥","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":125,"name":"明明白白我的心","artist":"成龙/陈淑桦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":126,"name":"今天你要嫁给我","artist":"陶喆/蔡依林","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":127,"name":"有一点动心","artist":"张信哲/刘嘉玲","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":128,"name":"水晶","artist":"任贤齐/徐怀钰","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":129,"name":"你最珍贵","artist":"张学友/高慧君","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":130,"name":"知心爱人","artist":"付笛生/任静","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":131,"name":"屋顶","artist":"周杰伦/温岚","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":132,"name":"千里之外","artist":"周杰伦/费玉清","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":133,"name":"不得不爱","artist":"潘玮柏/弦子","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":134,"name":"快乐崇拜","artist":"潘玮柏/张韶涵","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":135,"name":"被风吹过的夏天","artist":"林俊杰/金莎","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":136,"name":"小酒窝","artist":"林俊杰/蔡卓妍","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":137,"name":"期待爱","artist":"林俊杰/徐若瑄","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":138,"name":"爱很简单","artist":"陶喆","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":139,"name":"就是爱你","artist":"陶喆","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":140,"name":"私奔到月球","artist":"五月天/陈绮贞","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":141,"name":"你不知道的事","artist":"王力宏","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":142,"name":"珊瑚海","artist":"周杰伦/Lara","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":143,"name":"退后","artist":"周杰伦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":144,"name":"爱我别走","artist":"张震岳","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":145,"name":"那些年","artist":"胡夏","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":146,"name":"小幸运","artist":"田馥甄","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":147,"name":"一次就好","artist":"杨宗纬","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":148,"name":"可可托海的牧羊人","artist":"王琪","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":149,"name":"稳稳的幸福","artist":"陈奕迅","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":150,"name":"陪你度过漫长岁月","artist":"陈奕迅","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":151,"name":"孤勇者","artist":"陈奕迅","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":152,"name":"起风了","artist":"买辣椒也用券","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":153,"name":"你的答案","artist":"阿冗","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":154,"name":"少年","artist":"梦然","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":155,"name":"踏山河","artist":"是七叔呢","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":156,"name":"飞鸟和蝉","artist":"任然","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":157,"name":"白月光与朱砂痣","artist":"大籽","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":158,"name":"星辰大海","artist":"黄霄雲","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":159,"name":"大风吹","artist":"王赫野","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":160,"name":"错位时空","artist":"艾辰","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":161,"name":"漠河舞厅","artist":"柳爽","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":162,"name":"红玫瑰","artist":"陈奕迅","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":163,"name":"浮夸","artist":"陈奕迅","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":164,"name":"十年","artist":"陈奕迅","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":165,"name":"因为爱情","artist":"王菲/陈奕迅","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":166,"name":"阴天快乐","artist":"陈奕迅","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":167,"name":"好久不见","artist":"陈奕迅","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":168,"name":"富士山下","artist":"陈奕迅","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":169,"name":"爱情转移","artist":"陈奕迅","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":170,"name":"最佳损友","artist":"陈奕迅","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":171,"name":"K歌之王","artist":"陈奕迅","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":172,"name":"爱就一个字","artist":"张信哲","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":173,"name":"过火","artist":"张信哲","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":174,"name":"信仰","artist":"张信哲","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":175,"name":"白月光","artist":"张信哲","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":176,"name":"从开始到现在","artist":"张信哲","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":177,"name":"用情","artist":"张信哲","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":178,"name":"心如刀割","artist":"张学友","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":179,"name":"如果这都不算爱","artist":"张学友","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":180,"name":"想和你去吹吹风","artist":"张学友","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":181,"name":"Yesterday Once More","artist":"Carpenters","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":182,"name":"Hotel California","artist":"Eagles","key":"Bm","maleKey":"","femaleKey":"","bpm":""},{"id":183,"name":"Hey Jude","artist":"Beatles","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":184,"name":"Let It Be","artist":"Beatles","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":185,"name":"Imagine","artist":"John Lennon","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":186,"name":"Take Me Home Country Roads","artist":"John Denver","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":187,"name":"Lemon Tree","artist":"Fool's Garden","key":"F","maleKey":"","femaleKey":"","bpm":""},{"id":188,"name":"Big Big World","artist":"Emilia","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":189,"name":"My Heart Will Go On","artist":"Celine Dion","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":190,"name":"Right Here Waiting","artist":"Richard Marx","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":191,"name":"Everything I Do","artist":"Bryan Adams","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":192,"name":"Casablanca","artist":"Bertie Higgins","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":193,"name":"Sealed with a Kiss","artist":"Brian Hyland","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":194,"name":"Rhythm of the Rain","artist":"The Cascades","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":195,"name":"Unchained Melody","artist":"Righteous Brothers","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":196,"name":"Can't Help Falling in Love","artist":"Elvis Presley","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":197,"name":"Love Me Tender","artist":"Elvis Presley","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":198,"name":"Moon River","artist":"Audrey Hepburn","key":"F","maleKey":"","femaleKey":"","bpm":""},{"id":199,"name":"Over the Rainbow","artist":"Judy Garland","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":200,"name":"Scarborough Fair","artist":"Simon & Garfunkel","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":201,"name":"The Sound of Silence","artist":"Simon & Garfunkel","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":202,"name":"Bridge Over Troubled Water","artist":"Simon & Garfunkel","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":203,"name":"Blowin' in the Wind","artist":"Bob Dylan","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":204,"name":"Knockin' on Heaven's Door","artist":"Bob Dylan","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":205,"name":"Seasons in the Sun","artist":"Terry Jacks","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":206,"name":"You Are My Sunshine","artist":"Traditional","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":207,"name":"Edelweiss","artist":"Traditional","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":208,"name":"I Will Always Love You","artist":"Whitney Houston","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":209,"name":"Nothing's Gonna Change My Love","artist":"Glenn Medeiros","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":210,"name":"My Love","artist":"Westlife","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":211,"name":"怒放的生命","artist":"汪峰","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":212,"name":"飞得更高","artist":"汪峰","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":213,"name":"勇敢的心","artist":"汪峰","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":214,"name":"北京北京","artist":"汪峰","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":215,"name":"春天里","artist":"汪峰","key":"Eb","maleKey":"","femaleKey":"","bpm":""},{"id":216,"name":"存在","artist":"汪峰","key":"E","maleKey":"","femaleKey":"","bpm":""},{"id":217,"name":"当我想你的时候","artist":"汪峰","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":218,"name":"光明","artist":"汪峰","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":219,"name":"朋友","artist":"周华健","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":220,"name":"花心","artist":"周华健","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":221,"name":"让我欢喜让我忧","artist":"周华健","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":222,"name":"其实不想走","artist":"周华健","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":223,"name":"风雨无阻","artist":"周华健","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":224,"name":"亲亲我的宝贝","artist":"周华健","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":225,"name":"有没有一首歌让你想起我","artist":"周华健","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":226,"name":"难念的经","artist":"周华健","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":227,"name":"海阔天空","artist":"Beyond","key":"F","maleKey":"E","femaleKey":"B","bpm":"77","timeSig":"4/4"},{"id":228,"name":"光辉岁月","artist":"Beyond","key":"E","maleKey":"E","femaleKey":"A","bpm":"75","timeSig":"4/4"},{"id":229,"name":"真的爱你","artist":"Beyond","key":"C","maleKey":"C","femaleKey":"F","bpm":"82","timeSig":"4/4"},{"id":230,"name":"喜欢你","artist":"Beyond","key":"C","maleKey":"C","femaleKey":"F","bpm":"76","timeSig":"4/4"},{"id":231,"name":"不再犹豫","artist":"Beyond","key":"G","maleKey":"G","femaleKey":"F","bpm":"134","timeSig":"4/4"},{"id":232,"name":"大地","artist":"Beyond","key":"G","maleKey":"","femaleKey":"","bpm":"","timeSig":"4/4"},{"id":233,"name":"灰色轨迹","artist":"Beyond","key":"A","maleKey":"","femaleKey":"","bpm":"72","timeSig":"4/4"},{"id":234,"name":"冷雨夜","artist":"Beyond","key":"Am","maleKey":"","femaleKey":"","bpm":"","timeSig":"4/4"},{"id":235,"name":"AMANI","artist":"Beyond","key":"Am","maleKey":"","femaleKey":"","bpm":"","timeSig":"4/4"},{"id":236,"name":"长城","artist":"Beyond","key":"G","maleKey":"","femaleKey":"","bpm":"","timeSig":"4/4"},{"id":237,"name":"谁伴我闯荡","artist":"Beyond","key":"G","maleKey":"","femaleKey":"","bpm":"","timeSig":"4/4"},{"id":238,"name":"再见理想","artist":"Beyond","key":"Bb","maleKey":"","femaleKey":"","bpm":"","timeSig":"4/4"},{"id":239,"name":"红日","artist":"李克勤","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":240,"name":"奔跑","artist":"羽泉","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":241,"name":"沧海一声笑","artist":"许冠杰","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":242,"name":"一生所爱","artist":"卢冠廷","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":243,"name":"友谊之光","artist":"Maria Cordero","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":244,"name":"当年情","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":245,"name":"风继续吹","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":246,"name":"沉默是金","artist":"张国荣","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":247,"name":"Monica","artist":"张国荣","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":248,"name":"为你钟情","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":249,"name":"我","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":250,"name":"追","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":251,"name":"今生今世","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":252,"name":"共同渡过","artist":"张国荣","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":253,"name":"奔向未来日子","artist":"张国荣","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":254,"name":"红颜白发","artist":"张国荣","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":255,"name":"童年","artist":"罗大佑","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":256,"name":"滚滚红尘","artist":"陈淑桦","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":257,"name":"笑红尘","artist":"陈淑桦","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":258,"name":"流光飞舞","artist":"陈淑桦","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":259,"name":"女儿情","artist":"李玲玉","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":260,"name":"好汉歌","artist":"刘欢","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":261,"name":"敢问路在何方","artist":"蒋大为","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":262,"name":"当","artist":"动力火车","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":263,"name":"千千阙歌","artist":"陈慧娴","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":264,"name":"飘雪","artist":"陈慧娴","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":265,"name":"月半小夜曲","artist":"李克勤","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":266,"name":"护花使者","artist":"李克勤","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":267,"name":"雨中的恋人们","artist":"黄凯芹","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":268,"name":"偏偏喜欢你","artist":"陈百强","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":269,"name":"念亲恩","artist":"陈百强","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":270,"name":"涟漪","artist":"陈百强","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":271,"name":"最浪漫的事","artist":"赵咏华","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":272,"name":"给你们","artist":"张宇","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":273,"name":"用心良苦","artist":"张宇","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":274,"name":"月亮惹的祸","artist":"张宇","key":"Ab","maleKey":"","femaleKey":"","bpm":""},{"id":275,"name":"雨一直下","artist":"张宇","key":"Bb","maleKey":"","femaleKey":"","bpm":""},{"id":276,"name":"小小","artist":"容祖儿","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":277,"name":"挥着翅膀的女孩","artist":"容祖儿","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":278,"name":"我的骄傲","artist":"容祖儿","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":279,"name":"相见恨晚","artist":"彭佳慧","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":280,"name":"走在红毯那一天","artist":"彭佳慧","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":281,"name":"喜欢两个人","artist":"彭佳慧","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":282,"name":"旧梦","artist":"彭佳慧","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":283,"name":"亲密爱人","artist":"梅艳芳","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":284,"name":"女人花","artist":"梅艳芳","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":285,"name":"一生爱你千百回","artist":"梅艳芳","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":286,"name":"似是故人来","artist":"梅艳芳","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":287,"name":"似水流年","artist":"梅艳芳","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":288,"name":"夕阳之歌","artist":"梅艳芳","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":289,"name":"心太软","artist":"任贤齐","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":290,"name":"伤心太平洋","artist":"任贤齐","key":"Em","maleKey":"","femaleKey":"","bpm":""},{"id":291,"name":"对面的女孩看过来","artist":"任贤齐","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":292,"name":"春天花会开","artist":"任贤齐","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":293,"name":"浪花一朵朵","artist":"任贤齐","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":294,"name":"我是一只鱼","artist":"任贤齐","key":"C","maleKey":"","femaleKey":"","bpm":""},{"id":295,"name":"依靠","artist":"任贤齐","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":296,"name":"天涯","artist":"任贤齐","key":"D","maleKey":"","femaleKey":"","bpm":""},{"id":297,"name":"哭砂","artist":"黄莺莺","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":298,"name":"新不了情","artist":"万芳","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":299,"name":"领悟","artist":"辛晓琪","key":"Am","maleKey":"","femaleKey":"","bpm":""},{"id":300,"name":"味道","artist":"辛晓琪","key":"G","maleKey":"","femaleKey":"","bpm":""},{"id":301,"name":"和弦对照表","artist":"—","key":"C","maleKey":"C","femaleKey":"C","bpm":"—","timeSig":"1/4","pinned":true,"progs":[{"n":"顺阶七级","p":"1|2|3|4|5|6|b1dim"},{"n":"流行卡农进行","p":"1|5|6|3|4|1|2|5"},{"n":"万能抒情变体","p":"4|5|3|6|2|5|1"},{"n":"标准 456 进行","p":"4|5|6|6"},{"n":"延伸版 4561 进行","p":"4|5|6|1"},{"n":"4536 变体（斜线和弦）","p":"4|5/F|3|6"},{"n":"五度循环进行","p":"2|5|1|4"},{"n":"小调顺阶下行 1","p":"6|5|4|3"},{"n":"小调顺阶下行 2","p":"6|5|4|1"},{"n":"现代流行、欧美影响","p":"6|4|1|5"},{"n":"老派流行、校园民谣","p":"1|6|4|5"},{"n":"爵士味、经典流行","p":"1|6|2|5"},{"n":"副歌常见","p":"6|4|1|2|5"},{"n":"最传统进行","p":"1|4|5|1"},{"n":"摇滚、流行情绪推进","p":"6|4|5|1"},{"n":"渐进情绪","p":"6|3|4|5"},{"n":"终止进行","p":"6|2|5|1"}]},{"id":302,"name":"Dear John","artist":"比莉","key":"F","maleKey":"C","femaleKey":"F","bpm":"72","timeSig":"4/4"},{"id":303,"name":"曾与你遇见","artist":"沙漏SAALAU","key":"Gb","maleKey":"Gb","femaleKey":"Gb","bpm":"65","timeSig":"4/4"},{"id":304,"name":"后来","artist":"刘若英","key":"Eb","maleKey":"Eb","femaleKey":"Eb","bpm":"76","timeSig":"4/4"},{"id":305,"name":"情人","artist":"Beyond","key":"C","maleKey":"C","femaleKey":"F","bpm":"73","timeSig":"4/4"},{"id":306,"name":"李白","artist":"李荣浩","key":"C","maleKey":"C","femaleKey":"F","bpm":"115","timeSig":"4/4"}];
+
+
+const progMap = {"1": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": ""}, "2": {"i": "1-6-2", "v": "1-6-2-5", "p": "", "c": "1-6-2-5", "b": ""}, "3": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "4": {"i": "1-6-4-5", "v": "1-6-4-5", "p": "", "c": "1-4-5-1", "b": ""}, "5": {"i": "1-6-2", "v": "1-6-2-5", "p": "", "c": "1-6-2-5", "b": ""}, "6": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-5-6-4", "b": ""}, "7": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "6-4-1-5", "b": ""}, "8": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "9": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "10": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "11": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": ""}, "12": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "13": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "6-4-1-5", "b": ""}, "14": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "6-4-1-5", "b": ""}, "15": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5", "b": "2-5-1-6"}, "16": {"i": "1-6-4-5", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": "4-5-1"}, "17": {"i": "6-4-5-1", "v": "6-4-5-1", "p": "", "c": "1-5-2-6", "b": "4-5-3-6"}, "18": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "19": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "20": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "21": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "4-5-3-6", "b": ""}, "22": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "23": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": ""}, "24": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "25": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": ""}, "26": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "6-4-1-5", "b": ""}, "27": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-5-6-4", "b": "2-5-1"}, "28": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": "4-5-3-6"}, "29": {"i": "1-6-4-5", "v": "1-1-4-1", "p": "", "c": "4-5-3-6", "b": ""}, "30": {"i": "1-2-5-1", "v": "1-1-2-2-5-5", "p": "", "c": "3-6-3-6-2-2-5-5", "b": ""}, "31": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "32": {"i": "1-5-6-4", "v": "1-5-6-3", "p": "4-5", "c": "1-5-6-4", "b": "4-5-3-6"}, "33": {"i": "4-5-3-6", "v": "1-5-6-3", "p": "4-5-3-6", "c": "4-5-3-6-2-5", "b": "2-5-1-6"}, "34": {"i": "1-6-2-5", "v": "1-6-2-5", "p": "", "c": "1-6-4-2-5", "b": ""}, "35": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "36": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "", "c": "1-5-6-3-4-1-2-5", "b": ""}, "37": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "", "c": "1-5-6-3-4-1-2-5", "b": "4-5-3-6-2-5-1"}, "38": {"i": "1-5-6-3", "v": "1-5-6-3-2-5-1", "p": "", "c": "1-5-6-3-2-5-1", "b": ""}, "39": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "4-5-3-6-4-5-1", "b": ""}, "40": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "41": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "", "c": "1-5-6-3-4-1-2-5", "b": ""}, "42": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "43": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "44": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "", "c": "1-5-6-3-4-1-2-5", "b": ""}, "45": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "46": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "47": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "", "c": "1-5-6-3-4-1-2-5", "b": ""}, "48": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "49": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "50": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "51": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "52": {"i": "4-5-3-6", "v": "1-5-6", "p": "6-3-4-5", "c": "4-5-3-6-4-5-1", "b": ""}, "53": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4", "b": "4-5-3-6"}, "54": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "55": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "56": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": "4-5-3-6"}, "57": {"i": "1-5-6-3", "v": "1-5-6-3-2-4", "p": "", "c": "1-5-6-3-2-4", "b": ""}, "58": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "59": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "60": {"i": "1-5-6-3", "v": "1-5-6-3", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "61": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "4-5-3-6", "c": "6-4-1-5", "b": ""}, "62": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "63": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "64": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "65": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "1-5-6-4", "b": ""}, "66": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": ""}, "67": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "68": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4", "b": ""}, "69": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "70": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "4-5-3-6", "c": "1-5-6-4", "b": "4-5-3-6"}, "71": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "72": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "73": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "74": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "75": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": "6-4-1-5"}, "76": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "77": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "78": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6", "b": ""}, "79": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "80": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "81": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "82": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "83": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "84": {"i": "1-6-4", "v": "1-6-4-5", "p": "4-5", "c": "1-5-6-4", "b": "4-5-3-6"}, "85": {"i": "1-5-6", "v": "1-5-6-5-4-5-1-5", "p": "", "c": "4-6-4-5-1-6-2-3-6", "b": ""}, "86": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "87": {"i": "1-6-4-5", "v": "1-6-4-5", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "88": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "89": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "90": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "91": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "92": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "93": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "94": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "95": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "96": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "97": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "98": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "6-4-1-5", "b": ""}, "99": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-5-6-4", "b": "2-5-1"}, "100": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "101": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "102": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "103": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "104": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "6-4-1-5", "b": "4-5-3-6"}, "105": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": ""}, "106": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "107": {"i": "1-5-6-4-5-1", "v": "1-5-6-4-5-1", "p": "", "c": "4-5-6-3-4-5-1", "b": ""}, "108": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "109": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "110": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": ""}, "111": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "112": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "6-4-1-5", "b": "4-5-3-6"}, "113": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "114": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": ""}, "115": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "116": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "117": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "4-5-3-6", "b": "2-5-1"}, "118": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "119": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "120": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "121": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "122": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "123": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "124": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": "4-5-3-6"}, "125": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "126": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": "2-5-1"}, "127": {"i": "1-6-4", "v": "1-6-4-5", "p": "", "c": "1-6-4-5", "b": ""}, "128": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "129": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "130": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "1-5-6-4", "b": ""}, "131": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "132": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "133": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "134": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "135": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "136": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "137": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "138": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "139": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "140": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": "4-5-3-6"}, "141": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "142": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "143": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "", "c": "1-5-6-3-4-1-2-5", "b": ""}, "144": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "145": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "146": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "147": {"i": "1-6-4", "v": "1-6-4-5", "p": "4-5", "c": "1-5-6-4", "b": ""}, "148": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "149": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "150": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "151": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "4-5-3-6", "c": "6-4-1-5", "b": ""}, "152": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "4-5-3-6", "c": "1-5-6-4", "b": "4-5-3-6"}, "153": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "154": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "155": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "156": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "4-5-3-6", "b": "4-5-3-6"}, "157": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "158": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "159": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": ""}, "160": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "161": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "6-4-1-5", "b": ""}, "162": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "163": {"i": "1-6-5-6", "v": "1-6-5-6", "p": "5-2-5", "c": "6-5-4-3-5", "b": "4-3-2-5"}, "164": {"i": "1-6-5-6", "v": "1-6-5-6", "p": "1-4-1-2-5-3", "c": "1-5-6-4-5", "b": ""}, "165": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "166": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "167": {"i": "1-6-4-5", "v": "1-6-4-5", "p": "", "c": "1-5-6-4-5", "b": "4-3-6-2-5"}, "168": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": "4-5-3-6"}, "169": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "170": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "171": {"i": "1-5-6-3", "v": "1-5-6-3-4-1-2-5", "p": "4-1-2-5", "c": "1-5-6-3-4-2-4-5", "b": "3-6-5-4-2-4-5"}, "172": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "173": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "174": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "175": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "176": {"i": "4-5-3-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "4-5-3-6-2-5-1", "b": "2-5-1-6"}, "177": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "178": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "179": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "180": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "181": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "182": {"i": "1-5-7-4-6-3-4-5", "v": "1-5-7-4-6-3-4-5", "p": "", "c": "6-3-5-1-6-3-4-5", "b": "1-5-7-4-6-3-4-5"}, "183": {"i": "1-5-1-4-5-1", "v": "1-5-1-4-5-1", "p": "", "c": "4-1-5-1", "b": "1-7-4"}, "184": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-1"}, "185": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "186": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "187": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "3-6-2-5"}, "188": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "189": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "190": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "191": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "192": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "193": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "194": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "195": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "196": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": "4-5-3-6"}, "197": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "198": {"i": "1-6-2", "v": "1-6-2-5", "p": "", "c": "1-5-6-4", "b": "2-5-1"}, "199": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "200": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "201": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": ""}, "202": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-1"}, "203": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "204": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "205": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "206": {"i": "1-5", "v": "1-5-1", "p": "", "c": "1-5-1", "b": ""}, "207": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "208": {"i": "1-5-6-4", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "209": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "210": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": ""}, "211": {"i": "6-1-2-6", "v": "6-1-2-6", "p": "", "c": "1-6-2-4-5-1", "b": ""}, "212": {"i": "1-4-1-5", "v": "1-4-1-5", "p": "6-1-6-6#-5", "c": "1-6-4-5", "b": ""}, "213": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "214": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "215": {"i": "1-6-4-5", "v": "1-6-4-5", "p": "", "c": "1-6-2-5", "b": ""}, "216": {"i": "1-6-2", "v": "1-6-2-5", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "217": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5", "c": "6-4-1-5", "b": ""}, "218": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "219": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "220": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "221": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "1-5-6-4", "b": ""}, "222": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "223": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "224": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": "4-5-3-6"}, "225": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "226": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "227": {"i": "1-1sus4-1-r|1-4|b7|4|5sus4|5", "v": "1|5|6|4|1|5|4|1", "c": "4-r-5|1|4-r-5|1|4-r-5|1-5/E-6-r|4-r-5", "s1": "b7|4|5sus4|5", "s2": "1|1|4-r-5|6|4-r-5|1maj7|4-r-5|6|2m7|3|6M|6M", "b": "6-r-5|4-r-5|6-r-5|1", "out": "4-r-5|6", "nm": {"s1": "间奏1", "s2": "间奏2"}, "del": ["p", "s3"]}, "228": {"i": "1-r-5|6-r-3-r|4-r-5|1-r-5", "v": "1-r-5-r|6-r-3-r|4-r-5|1-r-5", "p": "6-r-5-r|4-r-5|6-r-5|4-r-5", "c": "1-r-5|6-r-3|4-r-5|1-r-5|1-r-5|6-r-3|4-r-5", "out": "1-r-5|6-r-3|4-r-5|1-r-5", "nm": {"out": "间奏"}, "del": ["s2", "s1", "s3", "b"]}, "229": {"i": "1-r-5|6-r-4|1-r-5|1", "v": "1-r-5|6-r-4|1-r-5|1", "p": "4-r-5|4-r-5", "c": "1-r-5|6-r-4|1-r-5|1", "b": "1-r-5|6-r-4|1-r-5|1", "nm": {"i": "前奏 solo", "b": "solo"}, "del": ["s3", "s2", "s1", "out"]}, "230": {"i": "1|1|1|1|1", "v": "1|6|1|6|4|5", "c": "1|6|1|5|1|6|4|5|1", "s1": "1|1", "s2": "1-r-r-5/B|6-r-r-5|4|5", "b": "4|5|6|4|4|5|6|4-r-5|5", "s3": "", "out": "1|6|4|5", "nm": {"s1": "间奏 1", "s2": "间奏 2"}, "del": ["p"], "order": ["i", "v", "c", "s1", "s2", "b", "s3", "out"]}, "231": {"i": "1|5|6|3|2|4|5", "v": "1|5|6|3|2|4|5", "p": "6|5", "c": "1|5|6|3|2|4|5", "b": "1|5|6|3|2|4|5", "del": ["out", "s3", "s2", "s1"]}, "232": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "233": {"i": "6-1-5-6", "v": "6-1-5-6", "p": "2-6-3-7-4-5-1-5-6", "c": "4-5-1-5-6-4-5-6-4-5-1-5-6", "b": "6-1-5-6"}, "234": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "4-5-3-6", "b": "2-5-1"}, "235": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "236": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "237": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "238": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "239": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "240": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "241": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "242": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "243": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "244": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "245": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "246": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "247": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5-3-6", "c": "1-5-6-4", "b": ""}, "248": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "249": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "250": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "251": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "252": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": "4-5-3-6"}, "253": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "254": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "255": {"i": "1-5-6-4", "v": "1-6-4-5", "p": "", "c": "3-6-3-6-2-5-1", "b": ""}, "256": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "257": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "258": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "259": {"i": "1-6-4", "v": "1-6-4-5", "p": "4-5", "c": "1-6-4-5", "b": ""}, "260": {"i": "1-5", "v": "1-5-1", "p": "4-5-3-6", "c": "1-5-1", "b": "4-5-3-6"}, "261": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "262": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "263": {"i": "1-3-2-5", "v": "1-3-2-5", "p": "4-5-3-6-2-3-6", "c": "1-6-1-3-2-6-2-6-2-4-1", "b": ""}, "264": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "265": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "266": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "267": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": ""}, "268": {"i": "1-6-3-2", "v": "1-6-3-2-4-5", "p": "", "c": "6-3-4-5-1", "b": ""}, "269": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "270": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "271": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "272": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "273": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": ""}, "274": {"i": "6-1-5-2", "v": "6-1-5-2", "p": "5-6-4-1-5-3", "c": "6-1-2-6-4-1-5-6", "b": ""}, "275": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "276": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "277": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "278": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "279": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "280": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": "4-5-3-6"}, "281": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": ""}, "282": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": ""}, "283": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "284": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "285": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "286": {"i": "6-4-1", "v": "6-4-1-5", "p": "4-5-3-6", "c": "6-4-1-5", "b": ""}, "287": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "1-5-6-4-5", "b": ""}, "288": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "289": {"i": "1-6-4-5", "v": "1-6-4-5", "p": "", "c": "1-6-4-5-4-1-4-5-1", "b": ""}, "290": {"i": "1-6-2-5", "v": "1-1-6-6-2-2-5-5", "p": "6-3-6-2-5-1", "c": "1-6-3-6-4-5-6", "b": ""}, "291": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": ""}, "292": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "293": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "294": {"i": "1-5-6", "v": "1-5-6-4", "p": "4-5", "c": "4-5-3-6", "b": ""}, "295": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": ""}, "296": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "1-5-6-4", "b": "4-5-3-6"}, "297": {"i": "6-4-1", "v": "6-4-1-5", "p": "", "c": "4-5-3-6", "b": "2-5-1"}, "298": {"i": "6-4-1-5", "v": "6-4-1-5", "p": "", "c": "6-4-1-5", "b": "4-5-3-6"}, "299": {"i": "1-5-6-3", "v": "1-5-6-3", "p": "", "c": "1-5-6-3-4-1-2-5", "b": "4-1-2-5-1"}, "300": {"i": "1-5-6", "v": "1-5-6-4", "p": "", "c": "4-5-3-6", "b": "4-5-3-6"}, "301": {}, "302": {"i": "6m|4|5|3m|4|2m|3M|6m|4|5|3m|4|2m|3M", "v": "6m|4|5|3m|4|2m|3M|6m|4|5|3m|4|2m|3M|5", "p": "", "c": "1|5|6m|4|5|1|5|6m|4|5", "b": "4|5|6m|4|5|6m|4|5|6m|4|5|6m", "s1": "6m|4|5|3m|4|2m|3M", "s2": "6m|6m|4|5|6m|4|5|6m", "s3": "4|1|5|6m-5|4|1|5-4-5", "out": "4|1|5|6m|4|1|5|6m|4|1|5|6m|4|1|5|6m"}, "303": {"i": "1|3|4|5", "v": "1|3|4|5|1|3|4|5", "p": "4|5|3m|6m|4|5|1|1", "c": "1|6m|4|5|1|6m|4|5|4|5|3m|6m|2m|5|1|1", "b": "4|4m|1|5", "out": "1|4|1"}, "304": {"i": "1|5/7|6m|4|1/3|2m7|5", "v": "1|3m|6m|3m|4-5|3m-6m|4|5|1|3m|2m-4m|1-5/7|6m|3m|2m7-5|1", "p": "", "c": "2m7-5|3m-6m|4|5|1|5/7|6m|3m/5|4-5|3m-6m|2m7-5|1", "b": "1|4|2m7-5|4|1|2m7-5", "out": "1|5/7|6m|3m/5|4-5|3m-6m|2m7-5|1"}, "305": {"i": "1|6|4|5", "v": "1|6|4|5", "p": "4|5|1|5/B|6|4|4m|5sus4", "c": "1|6|2m7|5", "s1": "1|6|4|5", "s2": "4|5|1|5/B|6|4|4m|5sus4", "s3": "1|6|2m7|5", "b": "4|5|1|5/B|6|4|4m|5sus4|5", "out": "1", "nm": {"v": "主歌", "p": "桥段", "c": "副歌", "s1": "主歌", "s2": "桥段", "s3": "副歌", "b": "过渡", "out": "尾奏"}, "order": ["i", "v", "p", "c", "s1", "s2", "s3", "b", "out"]}, "306": {"i": "", "v": "4-4-1-1-6-3-6-3-6-2-3-4-4-1-1-4-4-1-1-6-3-6-3-6-3-2-3", "p": "", "c": "4-5-3-6-4-5-6-6-4-5-3-6-4-5-6-6-4-5-3-6-4-3", "b": "", "out": "3-3"}};
+
+// ======================== 转调和弦映射 ========================
+// 12个调的1-7级顺阶和弦（1=I主, 2=ii, 3=iii, 4=IV下属, 5=V属, 6=vi关系小调, 7=vii°减和弦）
+const keyChords = {
+  'C':  ['C','Dm','Em','F','G','Am','Bdim'],
+  'Db': ['Db','Ebm','Fm','Gb','Ab','Bbm','Cdim'],
+  'D':  ['D','Em','F#m','G','A','Bm','C#dim'],
+  'Eb': ['Eb','Fm','Gm','Ab','Bb','Cm','Ddim'],
+  'E':  ['E','F#m','G#m','A','B','C#m','D#dim'],
+  'F':  ['F','Gm','Am','Bb','C','Dm','Edim'],
+  'Gb': ['Gb','Abm','Bbm','Cb','Db','Ebm','Fdim'],
+  'G':  ['G','Am','Bm','C','D','Em','F#dim'],
+  'Ab': ['Ab','Bbm','Cm','Db','Eb','Fm','Gdim'],
+  'A':  ['A','Bm','C#m','D','E','F#m','G#dim'],
+  'Bb': ['Bb','Cm','Dm','Eb','F','Gm','Adim'],
+  'B':  ['B','C#m','D#m','E','F#','G#m','A#dim']
+};
+
+let transposeKey = 'C'; // 当前选中的调（始终为12个调之一，不再有"原调"空值）
+let currentOrigKey = null; // 当前展开歌曲的原调（用于标注"(原调)"），null=未展开任何歌曲
+
+// 小调歌曲→关系大调映射（级数本就按关系大调标注，如Am调歌曲的"6"=Am=C大调的vi）
+const minorToMajor = {'Am':'C','Bm':'D','Em':'G','F#m':'A','C#m':'E','G#m':'B','Dm':'F','Cm':'Eb','Fm':'Ab','Bbm':'Db','Abm':'Gb','Ebm':'B'};
+// 取某首歌用于和弦转换的有效调（始终用transposeKey，因为不再有"原调"模式）
+function effectiveChordKey(songKey) {
+  return transposeKey;
+}
+
+// 半音表（偏b记法，更符合流行吉他谱习惯）
+const chromaticNotes = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B'];
+// 和弦根音写法归一化（兼容 Db/C#、Bb/A# 等不同记谱习惯）
+const NOTE_NORM = {
+  'C':0,'B#':0,
+  'C#':1,'Db':1,
+  'D':2,'C##':2,
+  'Eb':3,'D#':3,
+  'E':4,'Fb':4,
+  'F':5,'E#':5,
+  'F#':6,'Gb':6,
+  'G':7,
+  'Ab':8,'G#':8,
+  'A':9,
+  'Bb':10,'A#':10,
+  'B':11,'Cb':11
+};
+// 大调音阶各级相对1级的半音数
+const degreeSemitones = {1:0, 2:2, 3:4, 4:5, 5:7, 6:9, 7:11};
+
+// 合并基础和弦名与suffix修饰符（处理 sus4/maj7/m7/M 等重叠）
+function mergeSuffix(baseChord, suffix) {
+  if (!suffix) return baseChord;
+  let b = baseChord, s = suffix;
+  // 'M' 或 'maj' 开头 → 大三和弦，去掉基础和弦的 'm'
+  if (s.startsWith('M') || s.startsWith('maj')) {
+    b = b.replace(/m$/, '');
+    if (s === 'M') s = '';
+  }
+  // 基础和弦尾 'm' 和 suffix首 'm' 去重
+  if (b.endsWith('m') && s.startsWith('m')) s = s.slice(1);
+  // 基础和弦尾 'dim' 和 suffix 开头不重复
+  return b + s;
+}
+
+// 把级数走向拆成小节数组 [{num:'1-5', chord:'C-G'}, ...]
+// 支持 | 分隔自定义小节；无 | 则按拍号分子 N 每 N 个符号（=N 拍）为一小节（纯顺序定位）
+function parseMeasures(str, chordStr, beats) {
+  if (beats == null) beats = 4;
+  if (!str) return [];
+  if (str.includes('|')) {
+    const numMs = str.split('|');
+    const chordMs = chordStr ? chordStr.split('|') : [];
+    return numMs.map((m, i) => ({ num: m, chord: chordMs[i] || '' }));
+  }
+  // 无 | ：1 符号 = 1 拍，每 N 拍（拍号分子）为一小节
+  const numTokens = str.split('-');
+  const chordTokens = chordStr ? chordStr.split('-') : [];
+  const measures = [];
+  for (let i = 0; i < numTokens.length; i += beats) {
+    measures.push({
+      num: numTokens.slice(i, i + beats).join('-'),
+      chord: chordTokens.slice(i, i + beats).join('-')
+    });
+  }
+  return measures;
+}
+
+// 兼容：formatProgMeasures 供CSV等使用
+function formatProgMeasures(str) {
+  if (!str) return '';
+  if (str.includes('|')) return '|' + str + '|';
+  const tokens = str.split('-');
+  const measures = [];
+  for (let i = 0; i < tokens.length; i += 2) {
+    measures.push(tokens.slice(i, i + 2).join('-'));
+  }
+  const lines = [];
+  for (let i = 0; i < measures.length; i += 4) {
+    lines.push('|' + measures.slice(i, i + 4).join('|') + '|');
+  }
+  return lines.join('\n');
+}
+
+// 取拍号分子（如 3/4 -> 3），缺省 4
+function numeratorOf(timeSig) {
+  const m = String(timeSig || '4/4').match(/(\d+)\s*\/\s*(\d+)/);
+  return m ? parseInt(m[1], 10) : 4;
+}
+
+// 把一段和弦字母拆成符号数组（每个符号=1拍）。
+// 规则：'-' 即为一个休止拍；相邻字母按和弦边界切分（如 CG->C,G；DmEm->Dm,Em；C/G 保持整体）。
+function splitChordTokens(str) {
+  const re = /[A-G][#b]*(?:maj\d*|min\d*|m\d*|m|M|dim|aug|sus\d*|add\d*|\+|\d+)?(?:\/[A-G][#b]*)?/g;
+  const s = String(str == null ? '' : str);
+  const out = [];
+  let i = 0;
+  while (i < s.length) {
+    if (s[i] === '-') { out.push('-'); i++; continue; }   // 休止拍
+    re.lastIndex = i;
+    const m = re.exec(s);
+    if (m && m.index === i && m[0]) { out.push(m[0]); i = re.lastIndex; }
+    else { i++; }   // 跳过非和弦字符（空格、N.C. 等）
+  }
+  return out;
+}
+
+// 把级数串里的字母低音（如 5/E 的 E）换算成相对原调的级数低音（如 5/7），使级数行与和弦行结构一致
+function letterBassToDegree(letter, origKey) {
+  const target = NOTE_NORM[letter];
+  if (target === undefined) return letter;
+  const chords = keyChords[origKey];
+  if (!chords) return letter;
+  for (let d = 1; d <= 7; d++) {
+    const m = chords[d - 1].match(/^([A-G][#b]*)/); // 直接取根音，规避 dim/m 后缀干扰
+    const r = m ? m[1] : '';
+    if ((NOTE_NORM[r] % 12) === (target % 12)) return String(d);
+  }
+  return letter; // 不在自然音阶内的变化低音，保持原字母
+}
+function bassLetterToDegreeStr(numToken, origKey) {
+  if (!numToken) return numToken;
+  const si = numToken.indexOf('/');
+  if (si < 0) return numToken;
+  const main = numToken.slice(0, si);
+  const bass = numToken.slice(si + 1);
+  if (!/^[A-G][#b]*$/.test(bass)) return numToken; // 已是数字低音（如 5/7）则不动
+  return main + '/' + letterBassToDegree(bass, origKey);
+}
+
+// 渲染一个小节内 N 个拍格（N=拍号分子）。纯顺序定位：每个符号占一拍、从左到右，
+// 空符号（休止）以 "-" 填充。级数(numStr)与和弦(chordStr)按位置一一对应。
+function measureCellsHtml(numStr, chordStr, beats, origKey) {
+  const nums = String(numStr == null ? '' : numStr).split('-').map(s => s.trim());
+  // 字母串用 splitChordTokens 切分：'-' 是休止符（自身即一个符号），需保留为休止而非分隔符
+  const chords = splitChordTokens(chordStr).map(s => s === '-' ? '' : s.trim());
+  // 级数行：把字母低音（如 5/E 的 E）按原调换算成级数低音（5/7），使级数行与和弦行结构一致
+  const numDegs = nums.map(n => bassLetterToDegreeStr(n, origKey));
+  let html = '';
+  for (let i = 0; i < beats; i++) {
+    const c = (i < chords.length) ? chords[i] : '';   // 超出符号数则视为休止
+    const nRaw = (c && i < numDegs.length) ? numDegs[i] : '';  // 休止拍不显示级数
+    // 级数后缀（sus/maj/min/dim/aug/add 等）用小字；转位 /X 不缩小
+    const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/\d+)?$/,
+      (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
+    // 和弦字母行同步：转位 /X 不缩小
+    const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:maj\d*|min|m\d*|m|M|dim|aug|sus\d*|add\d*|\+|\d+)?)(\/[A-G][#b]*)?$/,
+      (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
+    html += '<div class="beat' + (c ? ' has-chord' : ' rest') + '">'
+      + (nHtml ? '<div class="measure-num">' + nHtml + '</div>' : '')
+      + '<div class="measure-chord' + (c ? '' : ' rest-mark') + '">' + (c ? chordHtml : '-') + '</div>'
+      + '</div>';
+  }
+  return html;
+}
+
+// 单个级数token转字母和弦名
+// origKey：歌曲原调（存储度数所属调）；转调时字母低音需按（目标调-原调）半音数整体移动
+function convertToken(token, chords, keyIdx, origKey) {
+  // 处理转位标记 5/7 → G/B
+  const slashIdx = token.indexOf('/');
+  let mainPart = token, bassPart = '';
+  if (slashIdx >= 0) {
+    mainPart = token.slice(0, slashIdx);
+    bassPart = token.slice(slashIdx); // '/7'
+    // bass部分的数字也做级数→字母转换
+    const bm = bassPart.slice(1).match(/^([b#]?)(\d)(.*)$/);
+    if (bm) {
+      const bAcc = bm[1], bNum = parseInt(bm[2]), bSuffix = bm[3];
+      if (bNum >= 1 && bNum <= 7) {
+        let bassNote;
+        if (!bAcc) {
+          const bm2 = chords[bNum - 1].match(/^([A-G][#b]*)/); // 直接取根音，规避 dim/m 后缀干扰
+          bassNote = bm2 ? bm2[1] : '';
+        } else if (keyIdx >= 0) {
+          let bs = degreeSemitones[bNum];
+          if (bAcc === 'b') bs -= 1; else if (bAcc === '#') bs += 1;
+          bassNote = chromaticNotes[(keyIdx + bs + 12) % 12];
+        }
+        if (bassNote) bassPart = '/' + bassNote + bSuffix;
+      }
+    } else {
+      // 字母低音（如 /E）：绝对音名，需随转调按（目标调-原调）半音数整体移动，保持转位关系
+      const bassLetter = bassPart.slice(1);
+      if (/^[A-G][#b]*$/.test(bassLetter)) {
+        const eIdx = chromaticNotes.indexOf(bassLetter);
+        const origIdx = (origKey != null && NOTE_NORM[origKey] != null) ? NOTE_NORM[origKey] : ((NOTE_NORM[key] != null) ? NOTE_NORM[key] : -1);
+        if (eIdx >= 0 && origIdx >= 0) {
+          const newIdx = (eIdx + (keyIdx - origIdx) + 120) % 12;
+          bassPart = '/' + chromaticNotes[newIdx];
+        }
+      }
+    }
+  }
+  // 休止符：'r' 或空 token 在度数串中代表空拍
+  if (token === 'r' || token === '') return '-';
+  // 主部分转换
+  const m = mainPart.match(/^([b#]?)(\d)(.*)$/);
+  if (!m) return token;
+  const acc = m[1], num = parseInt(m[2]), suffix = m[3];
+  if (num < 1 || num > 7) return token;
+  if (!acc) return mergeSuffix(chords[num - 1], suffix) + bassPart;
+  if (keyIdx < 0) return token;
+  let semitone = degreeSemitones[num];
+  if (acc === 'b') semitone -= 1; else if (acc === '#') semitone += 1;
+  return mergeSuffix(chromaticNotes[(keyIdx + semitone + 12) % 12], suffix) + bassPart;
+}
+
+// 数字级数转字母和弦名
+// 支持 | 小节分隔、b7/#4 变化级数、sus4/maj7/m7/M 修饰、5/7 与 5/E 转位
+// origKey：歌曲原调；省略时等于 key（不转调），字母低音保持原样
+function numToChord(progStr, key, origKey) {
+  if (!progStr || !key) return '';
+  const chords = keyChords[key];
+  if (!chords) return '';
+  const keyIdx = (NOTE_NORM[key] != null) ? NOTE_NORM[key] : -1;
+  const oKey = (origKey != null) ? origKey : key;
+  // 按 | 分段处理小节；小节内每个符号（和弦或休止 '-'）占一拍，直接拼接（休止即一个 '-'）
+  return progStr.split('|').map(section => {
+    return section.split('-').map(token => convertToken(token, chords, keyIdx, oKey)).join('');
+  }).join('|');
+}
+
+// ======================== 字母和弦 → 数字级数（编辑模式反向推导） ========================
+// 把单个字母和弦（如 C / Am / G7 / F#m / C/G / Bdim）反向映射为相对某调的数字级数。
+// 优先用已有的 convertToken/numToChord 作为"真值"去做匹配搜索，确保正反向完全一致。
+function letterToDegree(token, key) {
+  token = (token || '').trim();
+  if (!token) return '';
+  if (token === '-' || token === 'r') return '';  // 休止符不参与级数推导
+  const keyIdx = (NOTE_NORM[key] != null) ? NOTE_NORM[key] : -1;
+  const chords = keyChords[key];
+  if (!chords) return token;
+  const m = token.match(/^([A-G][#b]*)(.*)$/);
+  if (!m) return token; // 非法和弦（如 N.C.）原样返回，不参与推导
+  const root = m[1];
+  const rest = m[2];
+  if (NOTE_NORM[root] === undefined) return token;
+  const rootPC = NOTE_NORM[root] % 12; // 根音音级（用于等音比较，兼容 Db/C# 不同记谱）
+  // 拆分 bass（转位）与 quality（和弦性质）
+  let bass = '', quality = rest;
+  const bi = rest.indexOf('/');
+  if (bi >= 0) { bass = rest.slice(bi); quality = rest.slice(0, bi); }
+  const qCands = ['', quality, 'M'];
+  // 1) 先试自然音级：直接用 keyChords 根音（兼容 Db/Eb/Ab 等降号调的正确拼法）
+  for (let d = 1; d <= 7; d++) {
+    const rRoot = chords[d - 1].replace(/m$/, '').replace(/dim$/, ''); // 取该级顺阶根音
+    if ((NOTE_NORM[rRoot] % 12) !== rootPC) continue;
+    for (const q of qCands) {
+      const test = d + q + bass;
+      if (numToChord(test, key) === token) return String(d) + (q || '') + bass;
+    }
+  }
+  // 2) 再试变化音级（b/#）：依赖半音表（降号调的转位/变化音为已知边界，仅升号调可用）
+  if (keyIdx >= 0) {
+    for (const acc of ['b', '#']) {
+      for (let d = 1; d <= 7; d++) {
+        const sem = degreeSemitones[d] + (acc === 'b' ? -1 : 1);
+        const r = chromaticNotes[(keyIdx + sem + 120) % 12];
+        if ((NOTE_NORM[r] % 12) !== rootPC) continue;
+        for (const q of qCands) {
+          const test = acc + d + q + bass;
+          if (numToChord(test, key) === token) return acc + d + (q || '') + bass;
+        }
+      }
+    }
+  }
+  return token; // 无法识别则原样保留
+}
+
+// 将整段字母和弦字符串（按 | 分段）反向推导为数字级数串（纯顺序：每个符号=1拍）。
+// 空符号（休止）保留为标记 'r'，确保往返不丢休止。和弦切分用 splitChordTokens（兼容 CG/C-G 两种写法）。
+function deriveDegrees(str, key) {
+  if (!str) return '';
+  return str.split('|').map(section => {
+    const toks = splitChordTokens(section);
+    return toks.map(t => t === '-' ? 'r' : letterToDegree(t, key)).join('-');
+  }).join('|');
+}
+
+// 从全部字母和弦中识别最可能的调（12 个大调之一）。
+// 评分：自然音级权重高于变化音级，平局时优先 preferKey（通常为歌曲原调的关系大调）。
+function detectKeyFromLetters(str, preferKey) {
+  const tokens = str.split(/[\s|]+/).map(t => t.trim()).filter(Boolean)
+    .flatMap(t => splitChordTokens(t))
+    .filter(t => t && t !== '-');   // 跳过休止符 '-'
+  if (!tokens.length) return null;
+  let bestKey = null, bestScore = -1;
+  for (const key of Object.keys(keyChords)) {
+    let nat = 0, alt = 0;
+    for (const tk of tokens) {
+      const deg = letterToDegree(tk, key);
+      if (deg && !/[A-Ga-g]/.test(deg)) { // 已成功解析为级数（不含字母）
+        if (/[#b]/.test(deg)) alt++; else nat++;
+      }
+    }
+    const score = nat * 2 + alt;
+    if (score > bestScore || (score === bestScore && key === preferKey)) {
+      bestScore = score; bestKey = key;
+    }
+  }
+  return bestScore > 0 ? bestKey : null;
+}
+
+// 更新调式按钮高亮（不再标注原调，原调已在歌曲列显示）
+function updateKeyBarLabels() {
+  // 仅更新高亮，按钮文字保持基础调名
+}
+
+// 选中某个调的按钮（高亮+更新标注）
+function selectKeyButton(key) {
+  document.querySelectorAll('.key-btn').forEach(b => b.classList.remove('active'));
+  const target = document.querySelector('.key-btn[data-key="' + key + '"]');
+  if (target) target.classList.add('active');
+  updateKeyBarLabels();
+}
+
+
+// 清除搜索
+function clearSearch() {
+  const input = document.getElementById('search');
+  input.value = '';
+  searchTerm = '';
+  document.getElementById('searchClear').classList.remove('visible');
+  render();
+  input.focus();
+}
+
+// 回到顶部
+function backToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== 临时歌单管理 =====
+// 添加到临时歌单
+function addToTemp(id) {
+  if (!tempList.includes(id)) {
+    tempList.push(id);
+    render();
+    // 切到临时歌单Tab，让用户看到添加效果
+    if (currentTab !== 'temp') {
+      // 在工作歌单里：按钮已通过render变成✓状态
+      // 闪烁临时歌单Tab提示
+      const tabTemp = document.getElementById('tab-temp');
+      tabTemp.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.15)', backgroundColor: 'rgba(88,166,255,0.25)' },
+        { transform: 'scale(1)' }
+      ], { duration: 350, easing: 'ease-out' });
+    }
+  }
+}
+// 从临时歌单移除
+function removeFromTemp(id) {
+  const idx = tempList.indexOf(id);
+  if (idx >= 0) {
+    tempList.splice(idx, 1);
+    render();
+  }
+}
+
+// 切换和弦对照表面板展开/收起
+function toggleRefPanel() {
+  const panel = document.getElementById('refPanel');
+  panel.classList.toggle('open');
+  // 展开/收起后 toolbar 高度变化，重新计算 thead sticky top
+  setTimeout(updateStickyTop, 260);
+}
+
+// 渲染和弦对照表（锁定行内的面板）
+// refEditMode 开启时：每个和弦进行模块变为可编辑卡片（改名/改级数、拖动排序、删除），并可新增模块。
+let refEditMode = false;
+const refUidMap = new Map();
+let _refUid = 0;
+function refModuleUid(pr) {
+  let u = refUidMap.get(pr);
+  if (u == null) { u = ++_refUid; refUidMap.set(pr, u); }
+  return u;
+}
+function renderRefPanel() {
+  const body = document.getElementById('refPanelBody');
+  if (!body) return;
+  const refSong = songs.find(s => s.pinned && s.progs);
+  if (!refSong || !refSong.progs) return;
+  const key = effectiveChordKey(refSong.key);
+  if (!refEditMode) {
+    // 普通模式：只读网格
+    const html = refSong.progs.map(pr => {
+      const val = pr.p || '';
+      const chordStr = numToChord(val, key, refSong.key);
+      const beats = numeratorOf(refSong.timeSig);
+      const measures = parseMeasures(val, chordStr, beats);
+      const cells = measures.map(m =>
+        '<div class="measure">' + measureCellsHtml(m.num, m.chord, beats, refSong.key) + '</div>'
+      ).join('');
+      return '<div class="prog-section"><span class="prog-label">' + escAttr(pr.n) + '</span><div class="prog-measures">' + cells + '</div></div>';
+    }).join('');
+    body.innerHTML = html;
+    updateRefEditBtn();
+    return;
+  }
+  // 编辑模式：可编辑卡片
+  const html = refSong.progs.map(pr => {
+    const uid = refModuleUid(pr);
+    const val = pr.p || '';
+    const chordStr = numToChord(val, key, refSong.key);
+    const preview = val ? chordStr : '';
+    return '<div class="prog-section ref-edit" data-prog-uid="' + uid + '" draggable="false" ondragover="refDragOver(event)" ondragleave="refDragLeave(event)" ondrop="refDragDrop(event)">' +
+      '<div class="sec-edit-head">' +
+        '<span class="section-drag" title="拖动排序" draggable="true" ondragstart="refDragStart(event,' + uid + ')" ondragend="refDragEnd(event)">≡</span>' +
+        '<button class="section-del" title="删除该进行" onclick="refRemoveProg(' + uid + ')">✕</button>' +
+        '<input class="section-label-input" id="reflabel-' + uid + '" value="' + escAttr(pr.n) + '" placeholder="进行名称" oninput="refSetName(' + uid + ',this.value)" />' +
+      '</div>' +
+      '<textarea class="edit-chords ref-prog-chords" id="refedit-' + uid + '" rows="1" oninput="autoGrow(this);refSetProg(' + uid + ',this.value)">' + escAttr(val) + '</textarea>' +
+      '<div class="ref-preview" id="refprev-' + uid + '">' + escAttr(preview) + '</div>' +
+    '</div>';
+  }).join('');
+  body.innerHTML = html + '<div class="add-section ref-add"><button class="btn outline" onclick="refAddProg()">＋ 添加和弦进行</button></div>';
+  body.querySelectorAll('.ref-prog-chords').forEach(el => autoGrow(el));
+  updateRefEditBtn();
+}
+
+// ======================== 和弦对照表编辑模式控制 ========================
+function toggleRefEditMode(e) {
+  if (e) e.stopPropagation();
+  refEditMode = !refEditMode;
+  renderRefPanel();
+}
+function updateRefEditBtn() {
+  const b = document.getElementById('refEditBtn');
+  const hint = document.getElementById('refEditHint');
+  if (!b) return;
+  if (refEditMode) {
+    b.className = 'ref-edit-btn active';
+    b.textContent = '✓ 完成';
+    if (hint) hint.textContent = '拖动 ≡ 排序 · 点 ＋ 新增 · 改名/改级数后自动保存';
+  } else {
+    b.className = 'ref-edit-btn';
+    b.textContent = '✏️ 编辑';
+    if (hint) hint.textContent = '';
+  }
+}
+// 编辑时写回数据（不触发整面板重渲染，保留输入焦点）
+function refFind(uid) {
+  const s = songs.find(x => x.pinned && x.progs);
+  return s ? s.progs.find(p => refModuleUid(p) === uid) : null;
+}
+function refSetName(uid, v) {
+  const p = refFind(uid);
+  if (p) p.n = v;
+}
+function refSetProg(uid, v) {
+  const p = refFind(uid);
+  if (!p) return;
+  p.p = v;
+  const prev = document.getElementById('refprev-' + uid);
+  if (prev) {
+    const s = songs.find(x => x.pinned && x.progs);
+    if (s) prev.textContent = v ? numToChord(v, effectiveChordKey(s.key), s.key) : '';
+  }
+}
+function refAddProg() {
+  const s = songs.find(x => x.pinned && x.progs);
+  if (!s) return;
+  const pr = { n: '新进行', p: '' };
+  s.progs.push(pr);
+  renderRefPanel();
+  const inp = document.getElementById('reflabel-' + refModuleUid(pr));
+  if (inp) inp.focus();
+}
+function refRemoveProg(uid) {
+  const s = songs.find(x => x.pinned && x.progs);
+  if (!s) return;
+  s.progs = s.progs.filter(p => refModuleUid(p) !== uid);
+  renderRefPanel();
+}
+// ---- 模块拖拽排序 ----
+let refDragSrcUid = null;
+function refDragStart(e, uid) {
+  refDragSrcUid = uid;
+  const el = e.target.closest('.prog-section');
+  if (el) { el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; }
+}
+function refDragEnd(e) {
+  const el = e.target.closest('.prog-section');
+  if (el) el.classList.remove('dragging');
+  document.querySelectorAll('.prog-section.drag-over').forEach(s => s.classList.remove('drag-over'));
+  refDragSrcUid = null;
+}
+function refDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const target = e.currentTarget;
+  if (String(target.dataset.progUid) !== String(refDragSrcUid)) target.classList.add('drag-over');
+}
+function refDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function refDragDrop(e) {
+  e.preventDefault();
+  const target = e.currentTarget;
+  target.classList.remove('drag-over');
+  if (refDragSrcUid == null) return;
+  const body = document.getElementById('refPanelBody');
+  if (!body) return;
+  const srcEl = body.querySelector('.prog-section[data-prog-uid="' + refDragSrcUid + '"]');
+  const dstEl = target;
+  if (!srcEl || srcEl === dstEl) return;
+  const children = Array.from(body.querySelectorAll('.prog-section.ref-edit'));
+  const srcI = children.indexOf(srcEl), dstI = children.indexOf(dstEl);
+  if (srcI < dstI) body.insertBefore(srcEl, dstEl.nextElementSibling);
+  else body.insertBefore(srcEl, dstEl);
+  // 依据拖拽后的 DOM 顺序，重排 progs 数组（用稳定 uid 映射回对象）
+  const newUids = Array.from(body.querySelectorAll('.prog-section.ref-edit')).map(el => parseInt(el.dataset.progUid, 10));
+  const s = songs.find(x => x.pinned && x.progs);
+  if (s) {
+    const byUid = new Map();
+    s.progs.forEach(p => byUid.set(refModuleUid(p), p));
+    s.progs = newUids.map(u => byUid.get(u));
+  }
+}
+
+const sectionNames = {i:'前奏 Intro', v:'主歌 Verse', p:'预副歌 Pre-Chorus', c:'副歌 Chorus', b:'桥段 Bridge', s1:'间奏 Solo 1', s2:'间奏 Solo 2', s3:'间奏 Solo 3', out:'尾奏 Outro'};
+const sectionOrder = ['i','v','p','c','s1','s2','b','s3','out'];
+
+// ======================== 弹奏备注（按段落独立存储）========================
+// 根据歌曲分类+段落生成默认弹奏建议（作为placeholder）
+function defaultSectionNote(song, section) {
+  // 统一默认弹奏建议（已移除按风格分类的差异化基调）
+  const tips = {i:'前奏型', v:'主歌伴奏', p:'渐强', c:'副歌加强', b:'间奏'};
+  return tips[section] || '';
+}
+// 读取某首歌某段落的备注
+// 段落备注：内存存储（当前会话有效，刷新即清空，回到初始空备注）
+const _sectionNotes = {"229_i":"SOLO","229_v":"分解","230_out":"X4","230_s2":"X2","230_v":"第二遍最后多一小节G","228_out":"4个间奏和弦一样，间奏2要*3","305_b":"过渡段含 Fm、Gsus4（离调和弦，丰富色彩）"};
+function getSectionNote(id, section) {
+  return _sectionNotes[id + '_' + section] || '';
+}
+// 保存某首歌某段落的备注（仅内存，不持久化）
+function saveSectionNote(id, section, val) {
+  _sectionNotes[id + '_' + section] = val;
+}
+// 备注输入框自动撑高（无下拉条）
+function autoGrow(el) {
+  el.style.height = '28px';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+// 生成单个段落（前奏/主歌/副歌…或对照表条目）的和弦展示 HTML。
+// editMode 为 true 且非置顶歌曲时，渲染为可直接编辑的字母和弦输入框；否则渲染数字级数+字母和弦网格。
+function escAttr(s) {
+  return (s == null ? '' : String(s))
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function getSectionName(s, k, def) {
+  const nm = progMap[s.id] && progMap[s.id].nm;
+  return (nm && nm[k]) ? nm[k] : def;
+}
+function sectionHtml(s, k, val, label, inEdit) {
+  const isProg = typeof k === 'string' && k.indexOf('prog') === 0;
+  const effLabel = getSectionName(s, k, label);
+  const hasCustom = !!(progMap[s.id] && progMap[s.id].nm && progMap[s.id].nm[k]);
+  // 普通模式：无和弦且无自定义名称则不渲染；编辑模式则始终渲染（便于改名/新增）
+  if (!val && !hasCustom && !inEdit) return '';
+  const noteVal = getSectionNote(s.id, k);
+  const notePh = isProg
+    ? ('备注：' + ((s.progs && s.progs[parseInt(k.slice(4))]) ? s.progs[parseInt(k.slice(4))].n : ''))
+    : defaultSectionNote(s, k);
+  const noteHtml = '<div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-' + s.id + '-' + k + '" placeholder="' + escAttr(notePh) + '" oninput="autoGrow(this);saveSectionNote(' + s.id + ',\'' + k + '\',this.value)" rows="1">' + noteVal + '</textarea></div>';
+
+  if (inEdit && !s.pinned) {
+    // 编辑模式：模块名称可输入、和弦以字母形式可改；空模块也渲染以便新增/命名
+    const baseKey = minorToMajor[s.key] || s.key;
+    const letterStr = val ? numToChord(val, baseKey) : '';
+    const editField = '<textarea class="edit-chords" id="edit-' + s.id + '-' + k + '" rows="1" oninput="autoGrow(this)">' + letterStr + '</textarea>';
+    const nameField = '<input class="section-label-input" id="label-' + s.id + '-' + k + '" value="' + escAttr(effLabel) + '" placeholder="模块名称" />';
+    const showDel = !isProg; // 固定与自定义模块均可删除（对照表 prog 已在 !s.pinned 处被排除）
+    const delBtn = showDel ? '<button class="section-del" title="移除该模块" onclick="removeSection(' + s.id + ',\'' + k + '\')">✕</button>' : '';
+    const dragHandle = '<span class="section-drag" title="拖动排序" draggable="true" ondragstart="dragSectionStart(event,' + s.id + ',\'' + k + '\')" ondragend="dragSectionEnd(event)">≡</span>';
+    return '<div class="prog-section edit" data-sec-key="' + k + '" ondragover="dragSectionOver(event)" ondragleave="dragSectionLeave(event)" ondrop="dragSectionDrop(event,' + s.id + ')">' + dragHandle + '<div class="sec-edit-head">' + delBtn + nameField + '</div>' + editField + '</div>' + noteHtml;
+  }
+
+  // 普通模式：数字级数 + 字母和弦网格（按拍号分子均分每小节）
+  const effKey = effectiveChordKey(s.key);
+  const chordStr = val ? numToChord(val, effKey, s.key) : '';
+  const beats = numeratorOf(s.timeSig);
+  const measures = val ? parseMeasures(val, chordStr, beats) : [];
+  const cells = measures.map(m => '<div class="measure">' + measureCellsHtml(m.num, m.chord, beats, s.key) + '</div>').join('');
+  return '<div class="prog-section"><span class="prog-label">' + escAttr(effLabel) + '</span><div class="prog-measures">' + cells + '</div>' + noteHtml + '</div>';
+}
+
+// ======================== 渲染逻辑（升级版 v3 · 精简） ========================
+let searchTerm = '';
+let sortField = 'id';
+let sortDir = 'asc';
+let currentTab = 'main';
+let editMode = false; // 编辑模式：开启后可直接修改字母和弦，保存时反向推导级数
+let currentDetailId = null; // 当前展开详情的歌曲 id（每次仅一首）
+const expandedSet = new Set();
+
+// ---- 初始数据（无持久化：刷新网页即回到文件内置初始状态）----
+
+// 临时歌单：文件初始内置 6 首（与静态 HTML 一致），编辑/拖拽仅存于内存
+const INITIAL_TEMP = [229,227,228,230,231,304,305,306];
+let tempList = INITIAL_TEMP.slice();
+
+// progMap：直接使用文件内联初始数据，编辑/删除仅存于内存
+// songs：直接使用文件内联初始数据，编辑仅存于内存
+
+// ======================== 导出修改指令（供助手回填 HTML）========================
+// 页面加载时对四类可编辑数据拍一份初始快照，导出时做 diff，只导出真正改动的部分。
+const _initSnap = {
+  tempList: INITIAL_TEMP.slice(),
+  songs: JSON.parse(JSON.stringify(songs)),
+  progMap: JSON.parse(JSON.stringify(progMap)),
+  notes: JSON.parse(JSON.stringify(_sectionNotes))
+};
+const _eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+// 构建导出数据对象：仅包含相对初始状态发生变化的字段
+function buildExportData() {
+  const out = {
+    _type: 'songbook-edit',
+    _note: '由歌单.html导出。把本段JSON直接发给助手，即可将这些改动回填进HTML初始数据。',
+    _exportedAt: new Date().toLocaleString('zh-CN', { hour12: false })
+  };
+  // 1) 临时歌单：改动则给出完整新数组（含顺序）
+  if (!_eq(tempList, _initSnap.tempList)) out.tempList = tempList.slice();
+  // 2) 歌曲元信息：仅改动的歌，给完整对象
+  const initSongById = {};
+  _initSnap.songs.forEach(s => { initSongById[s.id] = s; });
+  const songDiff = {};
+  songs.forEach(s => {
+    const orig = initSongById[s.id];
+    if (!orig || !_eq(orig, s)) songDiff[s.id] = s;
+  });
+  if (Object.keys(songDiff).length) out.songs = songDiff;
+  // 3) 和弦进行/模块：仅改动的歌，给完整 progMap 条目（被清空的记为 null）
+  const progDiff = {};
+  const allProgIds = new Set([...Object.keys(progMap), ...Object.keys(_initSnap.progMap)]);
+  allProgIds.forEach(id => {
+    const a = progMap[id], b = _initSnap.progMap[id];
+    if (!_eq(a, b)) progDiff[id] = (a === undefined ? null : a);
+  });
+  if (Object.keys(progDiff).length) out.progMap = progDiff;
+  // 4) 段落备注：仅改动的键（key 形如 "歌曲id_模块key"）
+  const noteDiff = {};
+  const allNoteKeys = new Set([...Object.keys(_sectionNotes), ...Object.keys(_initSnap.notes)]);
+  allNoteKeys.forEach(k => {
+    const a = (_sectionNotes[k] || ''), b = (_initSnap.notes[k] || '');
+    if (a !== b) noteDiff[k] = a;
+  });
+  if (Object.keys(noteDiff).length) out.sectionNotes = noteDiff;
+  return out;
+}
+
+function _exportChangeCount(data) {
+  return (data.tempList ? 1 : 0)
+    + (data.songs ? Object.keys(data.songs).length : 0)
+    + (data.progMap ? Object.keys(data.progMap).length : 0)
+    + (data.sectionNotes ? Object.keys(data.sectionNotes).length : 0);
+}
+
+let _lastExportText = '';
+function openExportModal() {
+  const data = buildExportData();
+  const n = _exportChangeCount(data);
+  const hint = document.getElementById('exportHint');
+  const ta = document.getElementById('exportTa');
+  if (n === 0) {
+    hint.innerHTML = '当前<b>没有检测到任何改动</b>（相对文件初始数据）。改动临时歌单 / 元信息 / 和弦 / 模块 / 备注后再导出。';
+    _lastExportText = JSON.stringify(data, null, 2);
+    ta.value = _lastExportText;
+  } else {
+    const parts = [];
+    if (data.tempList) parts.push('临时歌单');
+    if (data.songs) parts.push('元信息 ' + Object.keys(data.songs).length + ' 首');
+    if (data.progMap) parts.push('和弦/模块 ' + Object.keys(data.progMap).length + ' 首');
+    if (data.sectionNotes) parts.push('备注 ' + Object.keys(data.sectionNotes).length + ' 条');
+    hint.innerHTML = '检测到改动：<b>' + parts.join(' · ') + '</b>。用下方按钮<b>复制</b>或<b>下载</b>，把这段 JSON 直接发给助手即可回填到文件。';
+    _lastExportText = JSON.stringify(data, null, 2);
+    ta.value = _lastExportText;
+  }
+  document.getElementById('exportMask').classList.add('open');
+}
+function closeExportModal() {
+  document.getElementById('exportMask').classList.remove('open');
+}
+function copyExport() {
+  const ta = document.getElementById('exportTa');
+  const btn = document.getElementById('exportCopyBtn');
+  const done = () => { btn.textContent = '✅ 已复制'; btn.classList.add('ok'); setTimeout(() => { btn.textContent = '📋 复制文本'; btn.classList.remove('ok'); }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(_lastExportText).then(done).catch(() => { ta.focus(); ta.select(); document.execCommand('copy'); done(); });
+  } else {
+    ta.focus(); ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { alert('复制失败，请手动全选文本框内容复制。'); }
+  }
+}
+function downloadExport() {
+  const stamp = new Date().toLocaleString('zh-CN', { hour12: false }).replace(/[\/: ]/g, '-');
+  const blob = new Blob([_lastExportText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = '歌单修改指令-' + stamp + '.txt';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// 转调：固定初始选调 C（与 HTML 默认高亮一致），不持久化
+transposeKey = 'C';
+currentOrigKey = null;
+
+const tbody = document.getElementById('tbody');
+
+function keyClass(k) {
+  const map = {
+    'C':'key-C','G':'key-G','Am':'key-Am','D':'key-D','Em':'key-Em',
+    'F':'key-F','Bm':'key-Bm','A':'key-A','E':'key-E','Dm':'key-Dm',
+    'Db':'key-Db','Eb':'key-Eb','Ab':'key-Ab','Bb':'key-Bb',
+    'Gb':'key-Gb','B':'key-B'
+  };
+  return map[k] || 'key-other';
+}
+
+function getFiltered() {
+  let base = currentTab === 'temp'
+    ? tempList.map(id => songs.find(s => s.id === id)).filter(Boolean)
+    : songs.slice();
+  if (searchTerm) {
+    const t = searchTerm.toLowerCase();
+    base = base.filter(s => s.name.toLowerCase().includes(t) || s.artist.toLowerCase().includes(t));
+  }
+  return base;
+}
+
+function render() {
+  let list = getFiltered();
+  // 临时歌单保持人工顺序，不做自动排序
+  if (currentTab !== 'temp') {
+    list.sort((a, b) => {
+      const ap = a.pinned ? 1 : 0, bp = b.pinned ? 1 : 0;
+      if (ap !== bp) return bp - ap;
+      let va = a[sortField], vb = b[sortField];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  // 和弦对照表（工具条目）只在"锁定行"面板显示，从歌曲列表中移除
+  list = list.filter(s => !(s.pinned && s.progs));
+
+  document.getElementById('count-main').textContent = songs.filter(s => !s.pinned).length;
+  document.getElementById('count-temp').textContent = tempList.length;
+
+  if (currentTab === 'temp' && tempList.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-temp"><div class="empty-icon">⭐</div><div class="empty-text">临时歌单还是空的</div><div class="empty-hint">到「工作歌单」点击歌曲右侧的 ＋ 即可加入演出清单</div></td></tr>';
+    updateSortArrows();
+    return;
+  }
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="9" class="empty-row">没有找到匹配的歌曲 😢</td></tr>';
+    updateSortArrows();
+    return;
+  }
+
+  tbody.innerHTML = list.map((s, i) => {
+    const p = progMap[s.id] || {i:'',v:'',p:'',c:'',b:'',s1:'',s2:'',s3:'',out:''};
+    const hasProg = p.i||p.v||p.p||p.c||p.b||p.s1||p.s2||p.s3||p.out||(s.progs&&s.progs.length);
+    const pinnedCls = s.pinned ? ' pinned-row' : '';
+    const pinnedTag = s.pinned ? '<span class="pinned-tag">置顶</span>' : '';
+    const expanded = expandedSet.has(s.id);
+    const orderNo = currentTab === 'temp' ? (i + 1) : s.id;
+    let actionBtnHtml;
+    if (currentTab === 'temp') {
+      actionBtnHtml = '<button class="action-btn remove" title="移除" onclick="event.stopPropagation();removeFromTemp(' + s.id + ')">−</button>';
+    } else {
+      const added = tempList.includes(s.id);
+      actionBtnHtml = added
+        ? '<button class="action-btn added" title="已在清单" disabled>✓</button>'
+        : '<button class="action-btn" title="加入清单" onclick="event.stopPropagation();addToTemp(' + s.id + ')">＋</button>';
+    }
+    const rowHtml = `
+    <tr class="song-row${pinnedCls}" data-id="${s.id}" draggable="${currentTab==='temp'?'true':'false'}" onclick="toggleProg(${s.id})">
+      <td class="col-id">${orderNo}</td>
+      <td class="col-name">${s.name}${pinnedTag} ${hasProg ? '<span class="prog-toggle">' + (expanded ? '&#9660;' : '&#9654;') + '</span>' : ''}</td>
+      <td class="col-artist">${s.artist}</td>
+      <td class="col-key"><span class="key-badge ${keyClass(s.key)}">${s.key}</span></td>
+      <td class="col-male">${s.maleKey || ''}</td>
+      <td class="col-female">${s.femaleKey || ''}</td>
+      <td class="col-bpm">${s.bpm ? '<span class="bpm-link" title="设为节拍器速度" onclick="event.stopPropagation();setMetroBpm(' + s.bpm + ')">' + s.bpm + '</span>' : ''}</td>
+      <td class="col-timesig">${s.timeSig || ''}</td>
+      <td class="col-action">${actionBtnHtml}</td>
+    </tr>`;
+    return rowHtml;
+  }).join('');
+
+  updateSortArrows();
+  updateStickyTop();
+  // 详情区打开时，随列表/转调/编辑等同步刷新
+  if (currentDetailId) renderDetail();
+}
+
+function updateSortArrows() {
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sorted');
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = '';
+  });
+  const ths = document.querySelectorAll('thead th');
+  const fieldMap = ['id','name','artist','key','maleKey','femaleKey','bpm','timeSig'];
+  const idx = fieldMap.indexOf(sortField);
+  if (idx >= 0 && ths[idx]) {
+    ths[idx].classList.add('sorted');
+    ths[idx].querySelector('.sort-arrow').textContent = sortDir === 'asc' ? '▲' : '▼';
+  }
+}
+
+function sortBy(field) {
+  if (sortField === field) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; }
+  else { sortField = field; sortDir = 'asc'; }
+  render();
+}
+
+function navigateSong(dir) {
+  // 在当前过滤+排序后的列表中找到上一首/下一首
+  let list = getFiltered();
+  if (currentTab !== 'temp') {
+    list.sort((a, b) => {
+      const ap = a.pinned ? 1 : 0, bp = b.pinned ? 1 : 0;
+      if (ap !== bp) return bp - ap;
+      let va = a[sortField], vb = b[sortField];
+      if (typeof va === 'string') va = va.toLowerCase();
+      if (typeof vb === 'string') vb = vb.toLowerCase();
+      if (va < vb) return sortDir === 'asc' ? -1 : 1;
+      if (va > vb) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+  list = list.filter(s => !(s.pinned && s.progs));
+  const idx = list.findIndex(s => s.id === currentDetailId);
+  if (idx < 0) return;
+  const nextIdx = idx + dir;
+  if (nextIdx < 0 || nextIdx >= list.length) return;
+  const nextSong = list[nextIdx];
+  toggleProg(nextSong.id);
+}
+function toggleProg(id) {
+  const song = songs.find(s => s.id === id);
+  if (!song) return;
+  // 已打开的再次点击 → 关闭回到列表
+  if (currentDetailId === id) { closeDetail(); return; }
+  // 每次只能展开一首：清空其它，仅展开当前
+  currentDetailId = id;
+  expandedSet.clear();
+  expandedSet.add(id);
+  const origKey = minorToMajor[song.key] || song.key;
+  currentOrigKey = origKey;
+  transposeKey = origKey;
+  selectKeyButton(origKey);
+  if (song.bpm) setMetroBpm(song.bpm);
+  openDetail();
+  renderRefPanel();
+}
+// 打开详情区：隐藏列表、显示铺满锁定行以下的全屏和弦页
+function openDetail() {
+  const song = songs.find(s => s.id === currentDetailId);
+  if (!song) return;
+  const dv = document.getElementById('detailView');
+  const tw = document.querySelector('.table-wrap');
+  if (tw) tw.style.display = 'none';
+  // 计算"锁定行"底部作为详情区 top（tab-bar + toolbar + 和弦对照表面板）
+  let top = 0;
+  const tb = document.querySelector('.toolbar');
+  if (tb) top = Math.max(top, tb.getBoundingClientRect().bottom);
+  const rp = document.getElementById('refPanel');
+  if (rp && rp.offsetHeight) top = Math.max(top, rp.getBoundingClientRect().bottom);
+  dv.style.top = top + 'px';
+  dv.classList.add('open');
+  renderDetail();
+  if (dv.scrollTo) dv.scrollTo({ top: 0 });
+}
+// 渲染详情区内容（复用 sectionHtml）
+function renderDetail() {
+  const id = currentDetailId;
+  const song = songs.find(s => s.id === id);
+  if (!song) return;
+  const p = progMap[id] || {i:'',v:'',p:'',c:'',b:'',s1:'',s2:'',s3:'',out:''};
+  const hasProg = p.i||p.v||p.p||p.c||p.b||p.s1||p.s2||p.s3||p.out||(song.progs&&song.progs.length);
+  // 标题：歌名 + 右侧元信息（原调 / 男调 / 女调 / 速度 / 拍号）
+  const titleEl = document.getElementById('detailTitle');
+  if (editMode && !song.pinned) {
+    // 编辑模式：元信息可输入
+    const keyOpts = (sel) => '<option value="">—</option>' + Object.keys(keyChords).map(k => '<option value="' + k + '"' + (k === sel ? ' selected' : '') + '>' + k + '</option>').join('');
+    let meta = '<span class="dm-edit"><label>原调</label><select id="meta-key-' + id + '">' + keyOpts(song.key) + '</select></span>';
+    meta += '<span class="dm-edit"><label>男调</label><select id="meta-mk-' + id + '">' + keyOpts(song.maleKey) + '</select></span>';
+    meta += '<span class="dm-edit"><label>女调</label><select id="meta-fk-' + id + '">' + keyOpts(song.femaleKey) + '</select></span>';
+    meta += '<span class="dm-edit"><label>速度</label><input id="meta-bpm-' + id + '" type="text" value="' + escAttr(song.bpm || '') + '" placeholder="BPM" /></span>';
+    meta += '<span class="dm-edit"><label>拍号</label><input id="meta-ts-' + id + '" type="text" value="' + escAttr(song.timeSig || '') + '" placeholder="4/4" /></span>';
+    titleEl.innerHTML = '<span class="detail-name">' + song.name + '</span><span class="detail-meta edit-meta">' + meta + '</span>';
+  } else {
+    const chip = (label, val) => '<span class="dm-chip"><i>' + label + '</i><b>' + val + '</b></span>';
+    let meta = chip('原调', song.key || '—');
+    if (song.maleKey) meta += chip('男调', song.maleKey);
+    if (song.femaleKey) meta += chip('女调', song.femaleKey);
+    if (song.bpm) meta += chip('速度', song.bpm);
+    if (song.timeSig) meta += chip('拍号', song.timeSig);
+    titleEl.innerHTML = '<span class="detail-name">' + song.name + '</span><span class="detail-meta">' + meta + '</span>';
+  }
+  // 正文：各段落和弦（编辑模式下为可输入字母框 / 可改名 / 可新增模块）
+  const bodyEl = document.getElementById('detailBody');
+  const cur = progMap[id] || {};
+  const customKeys = Object.keys(cur).filter(k => k !== 'nm' && k !== 'del' && k !== 'order' && sectionOrder.indexOf(k) < 0 && k.indexOf('prog') !== 0);
+  const removed = (cur.del) || [];
+  // 构建有序 key 列表：优先用自定义 order，否则用默认顺序
+  let orderedKeys;
+  if (cur.order && Array.isArray(cur.order)) {
+    const validOrder = cur.order.filter(k => (sectionOrder.indexOf(k) >= 0 && removed.indexOf(k) < 0) || customKeys.indexOf(k) >= 0 || k.indexOf('prog') === 0);
+    const remaining = sectionOrder.filter(k => removed.indexOf(k) < 0 && validOrder.indexOf(k) < 0);
+    const remainingCustom = customKeys.filter(k => validOrder.indexOf(k) < 0);
+    orderedKeys = validOrder.concat(remaining, remainingCustom);
+  } else {
+    orderedKeys = sectionOrder.filter(k => removed.indexOf(k) < 0).concat(customKeys);
+  }
+  // prog keys 始终排在最后
+  const progKeys = (song.progs || []).map((_, idx) => 'prog' + idx);
+  const nonProgKeys = orderedKeys.filter(k => k.indexOf('prog') !== 0);
+  orderedKeys = nonProgKeys.concat(progKeys.filter(k => nonProgKeys.indexOf(k) < 0));
+  let html = '<div class="prog-detail">';
+  orderedKeys.forEach(k => {
+    const isProg = k.indexOf('prog') === 0;
+    html += sectionHtml(song, k, p[k] || '', isProg ? (song.progs && song.progs[parseInt(k.slice(4))] ? song.progs[parseInt(k.slice(4))].n : '') : (sectionNames[k] || '模块'), editMode);
+  });
+  html += (editMode && !song.pinned ? '<div class="add-section"><button class="btn outline" onclick="addSection(' + id + ')">＋ 添加模块</button></div>' : '');
+  html += (!hasProg && customKeys.length === 0 ? '<span class="prog-empty">暂无和弦走向数据</span>' : '');
+  html += '</div>';
+  bodyEl.innerHTML = html;
+  bodyEl.querySelectorAll('.section-note-input').forEach(el => autoGrow(el));
+  updateEditBtn();
+}
+// 关闭详情区，回到歌曲列表
+function closeDetail() {
+  const id = currentDetailId;
+  const dv = document.getElementById('detailView');
+  const tw = document.querySelector('.table-wrap');
+  if (tw) tw.style.display = '';
+  if (dv) { dv.classList.remove('open'); }
+  currentDetailId = null;
+  expandedSet.clear();
+  editMode = false;
+  updateEditBtn();
+  render();
+  renderRefPanel();
+  if (id != null) {
+    const row = document.querySelector('.song-row[data-id="' + id + '"]');
+    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    else window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+// ======================== 编辑模式：保存 / 开关 ========================
+function toggleEditMode() {
+  editMode = !editMode;
+  render();
+  renderRefPanel();
+  updateEditBtn();
+}
+function updateEditBtn() {
+  const b = document.getElementById('editToggle');
+  const c = document.getElementById('editCancel');
+  if (b) {
+    if (editMode) {
+      b.className = 'btn primary';
+      b.textContent = '💾 保存并推导级数';
+      b.onclick = () => saveChordEdit(currentDetailId);
+    } else {
+      b.className = 'btn outline';
+      b.textContent = '✏️ 编辑';
+      b.onclick = () => toggleEditMode();
+    }
+  }
+  if (c) c.style.display = editMode ? '' : 'none';
+}
+// ======================== 模块拖拽排序 ========================
+let dragSrcKey = null;
+function dragSectionStart(e, id, k) {
+  dragSrcKey = k;
+  const el = e.target.closest('.prog-section');
+  if (el) { el.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', k); }
+}
+function dragSectionEnd(e) {
+  const el = e.target.closest('.prog-section');
+  if (el) el.classList.remove('dragging');
+  document.querySelectorAll('.prog-section.drag-over').forEach(s => s.classList.remove('drag-over'));
+  dragSrcKey = null;
+}
+function dragSectionOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  const target = e.currentTarget;
+  if (target.dataset.secKey !== dragSrcKey) target.classList.add('drag-over');
+}
+function dragSectionLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function dragSectionDrop(e, id) {
+  e.preventDefault();
+  e.stopPropagation();
+  const target = e.currentTarget;
+  target.classList.remove('drag-over');
+  const srcKey = e.dataTransfer.getData('text/plain');
+  const dstKey = target.dataset.secKey;
+  if (!srcKey || srcKey === dstKey) return;
+  const pd = document.querySelector('#detailBody .prog-detail');
+  if (!pd) return;
+  const srcEl = pd.querySelector('.prog-section[data-sec-key="' + srcKey + '"]');
+  const dstEl = pd.querySelector('.prog-section[data-sec-key="' + dstKey + '"]');
+  if (!srcEl || !dstEl) return;
+  // 确定插入位置：若 src 在 dst 之前，插到 dst 之后；反之插到 dst 之前
+  const children = Array.from(pd.children).filter(c => c.classList.contains('prog-section'));
+  const srcIdx = children.indexOf(srcEl), dstIdx = children.indexOf(dstEl);
+  if (srcIdx < dstIdx) {
+    pd.insertBefore(srcEl, dstEl.nextElementSibling);
+  } else {
+    pd.insertBefore(srcEl, dstEl);
+  }
+  // 记录自定义排序到 progMap
+  const pm = progMap[id] || (progMap[id] = {});
+  const newOrder = Array.from(pd.querySelectorAll('.prog-section[data-sec-key]')).map(el => el.dataset.secKey);
+  pm.order = newOrder;
+}
+// 新增一个空白自定义模块（不重建 DOM，保留其它段落的未保存编辑）
+function addSection(id) {
+  const pm = progMap[id] || (progMap[id] = {});
+  let n = 0;
+  while (('x' + n) in pm) n++;
+  pm['x' + n] = '';
+  if (!pm.nm) pm.nm = {};
+  pm.nm['x' + n] = '新模块';
+  const song = songs.find(s => s.id === id);
+  const pd = document.querySelector('#detailBody .prog-detail');
+  if (!pd) return;
+  const addBtn = pd.querySelector('.add-section');
+  const wrap = document.createElement('div');
+  wrap.innerHTML = sectionHtml(song, 'x' + n, '', '模块', true);
+  // 编辑模式下 sectionHtml 返回「模块区 + 备注区」两个并列节点，需全部插入（否则备注框丢失）
+  Array.from(wrap.children).forEach(nd => pd.insertBefore(nd, addBtn));
+  const inp = pd.querySelector('#label-' + id + '-x' + n);
+  if (inp) inp.focus();
+  const ta = pd.querySelector('#note-' + id + '-x' + n);
+  if (ta) autoGrow(ta);
+}
+// 移除一个模块（自定义直接删 key；原有固定模块标记为已删除）
+function removeSection(id, k) {
+  const pm = progMap[id];
+  if (!pm) return;
+  if (sectionOrder.indexOf(k) < 0 && k.indexOf('prog') !== 0) {
+    // 自定义模块：直接删除 key 与名称
+    delete pm[k];
+    if (pm.nm) delete pm.nm[k];
+  } else {
+    // 原有固定模块：标记删除（渲染时跳过），并清除其内容与自定义名
+    if (!pm.del) pm.del = [];
+    if (pm.del.indexOf(k) < 0) pm.del.push(k);
+    delete pm[k];
+    if (pm.nm) delete pm.nm[k];
+  }
+  const node = document.querySelector('#label-' + id + '-' + k);
+  if (node) { const sec = node.closest('.prog-section'); if (sec) sec.remove(); }
+}
+
+// 保存某首歌的字母和弦编辑：反向推导级数并设定选调
+function saveChordEdit(id) {
+  const song = songs.find(s => s.id === id);
+  if (!song) return;
+  const cur = progMap[id] || {};
+  const preferKey = minorToMajor[song.key] || song.key;
+  const del = cur.del || [];
+  // 读取编辑态下的元信息输入（原调 / 男调 / 女调 / 速度 / 拍号）
+  const _mKeyEl = document.getElementById('meta-key-' + id);
+  const _mMkEl = document.getElementById('meta-mk-' + id);
+  const _mFkEl = document.getElementById('meta-fk-' + id);
+  const _mBpmEl = document.getElementById('meta-bpm-' + id);
+  const _mTsEl = document.getElementById('meta-ts-' + id);
+  const _newOrigKey = (_mKeyEl && _mKeyEl.value) ? _mKeyEl.value : song.key;
+  const _origKeyChanged = !!_mKeyEl && !!_mKeyEl.value && _mKeyEl.value !== song.key;
+  // 按 DOM 中实际顺序收集 key（尊重拖拽排序结果）
+  const pd = document.querySelector('#detailBody .prog-detail');
+  let allKeys;
+  if (pd) {
+    allKeys = Array.from(pd.querySelectorAll('.prog-section[data-sec-key]')).map(el => el.dataset.secKey);
+  } else {
+    const fixedKeys = sectionOrder.filter(k => (cur[k] || '') !== '' || (cur.nm && cur.nm[k])).filter(k => del.indexOf(k) < 0);
+    const customKeys = Object.keys(cur).filter(k => k !== 'nm' && k !== 'del' && k !== 'order' && sectionOrder.indexOf(k) < 0 && k.indexOf('prog') !== 0);
+    const progKeys = (song.progs || []).map((_, i) => 'prog' + i);
+    allKeys = fixedKeys.concat(customKeys, progKeys);
+  }
+  // 收集全部字母用于调性识别
+  let combined = '';
+  allKeys.forEach(k => {
+    const ta = document.getElementById('edit-' + id + '-' + k);
+    if (ta) combined += ' ' + ta.value.trim();
+  });
+  if (!combined.trim()) { // 无任何可推导内容：直接退出编辑
+    editMode = false;
+    updateEditBtn();
+    render();
+    return;
+  }
+  // 推导级数始终按和弦字母自动识别（平局优先原调）；原调仅作为“转调默认调”，不参与重定价
+  const key = detectKeyFromLetters(combined, preferKey);
+  if (!key) {
+    alert('无法识别调性，请检查输入的和弦名称是否正确（如 C、Am、G7、F#m、C/G 等）。');
+    return;
+  }
+  const newProg = {};
+  const nm = {};
+  allKeys.forEach(k => {
+    const ta = document.getElementById('edit-' + id + '-' + k);
+    const letterStr = ta ? ta.value.trim() : (cur[k] || '');
+    newProg[k] = letterStr ? deriveDegrees(letterStr, key) : ''; // 空模块（仅命名）也保留为空串
+    const lab = document.getElementById('label-' + id + '-' + k);
+    const labVal = lab ? lab.value.trim() : getSectionName(song, k, '');
+    const def = (k.indexOf('prog') === 0) ? '' : (sectionNames[k] || '模块');
+    if (k.indexOf('prog') !== 0 && labVal && labVal !== def) nm[k] = labVal;
+  });
+  if (Object.keys(nm).length) newProg.nm = nm;
+  if (del.length) newProg.del = del;
+  // 持久化拖拽排序（仅当顺序与默认不同时记录）
+  const defaultOrder = sectionOrder.filter(k => (cur[k] || '') !== '' || (cur.nm && cur.nm[k])).filter(k => del.indexOf(k) < 0)
+    .concat(Object.keys(cur).filter(k => k !== 'nm' && k !== 'del' && k !== 'order' && sectionOrder.indexOf(k) < 0 && k.indexOf('prog') !== 0));
+  const currentOrder = allKeys.filter(k => k.indexOf('prog') !== 0);
+  if (JSON.stringify(currentOrder) !== JSON.stringify(defaultOrder)) {
+    newProg.order = currentOrder;
+  }
+  progMap[id] = newProg;
+  // 元信息编辑结果（原调 / 男调 / 女调 / 速度 / 拍号）仅存于内存
+  if (_mKeyEl && _mKeyEl.value) song.key = _mKeyEl.value;
+  if (_mMkEl && _mMkEl.value) song.maleKey = _mMkEl.value;
+  if (_mFkEl && _mFkEl.value) song.femaleKey = _mFkEl.value;
+  if (_mBpmEl) song.bpm = _mBpmEl.value.trim();
+  if (_mTsEl) song.timeSig = _mTsEl.value.trim();
+  // 原调即“转调默认调”：仅当用户改动过原调时，默认选调落到新原调（只改默认值，不重定价级数）；
+  // 否则沿用推导出的实际调，保持显示与输入一致
+  transposeKey = _origKeyChanged ? _newOrigKey : key;
+  selectKeyButton(transposeKey);
+  currentOrigKey = _newOrigKey;
+  editMode = false;
+  updateEditBtn();
+  render();
+  renderRefPanel();
+}
+
+// 切换选调（无持久化，刷新即回到初始选调）
+function changeTransposeKey(key, btnEl) {
+  transposeKey = key;
+  document.querySelectorAll('.key-btn').forEach(b => b.classList.remove('active'));
+  const t = document.querySelector('.key-btn[data-key="' + key + '"]');
+  if (t) t.classList.add('active');
+  render();
+  renderRefPanel();
+}
+
+// 覆盖原 switchTab：切换时清空展开状态
+function switchTab(tab) {
+  closeDetail();
+  if (currentTab === tab) return;
+  currentTab = tab;
+  expandedSet.clear();
+  document.getElementById('tab-main').classList.toggle('active', tab === 'main');
+  document.getElementById('tab-temp').classList.toggle('active', tab === 'temp');
+  const input = document.getElementById('search');
+  input.value = '';
+  searchTerm = '';
+  document.getElementById('searchClear').classList.remove('visible');
+  render();
+  renderRefPanel();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateStickyTop() {
+  const tb = document.querySelector('.toolbar');
+  if (tb) {
+    const h = tb.offsetHeight;
+    document.querySelectorAll('thead th').forEach(th => th.style.top = h + 'px');
+  }
+}
+
+// ======================== 节拍器（Web Audio · 拍号自由输入） ========================
+let metroCtx = null, metroTimer = null, metroOn = false, metroBpm = 80, beatCount = 0;
+let meterNum = 4, meterDen = 4;
+function ensureCtx() { if (!metroCtx) metroCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+function clickSound(acc) {
+  ensureCtx();
+  const freq = acc === 'strong' ? 1500 : (acc === 'mid' ? 1100 : 800);
+  const gain = acc === 'strong' ? 0.5 : (acc === 'mid' ? 0.4 : 0.3);
+  const o = metroCtx.createOscillator(), g = metroCtx.createGain();
+  o.frequency.value = freq;
+  g.gain.setValueAtTime(gain, metroCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, metroCtx.currentTime + 0.05);
+  o.connect(g); g.connect(metroCtx.destination);
+  o.start(); o.stop(metroCtx.currentTime + 0.05);
+}
+// 返回某拍在小结内的重音级别
+function meterAccent(pos) {
+  if (pos === 0) return 'strong';
+  if (meterDen === 8 && meterNum % 3 === 0 && pos % 3 === 0) return 'mid'; // 6/8 · 9/8 · 12/8 复合拍
+  if (meterNum === 5 && pos === 2) return 'mid';                              // 5/4（3+2 感）
+  if (meterNum === 7 && (pos === 2 || pos === 4)) return 'mid';            // 7/8
+  return 'weak';
+}
+function renderBeat() {
+  const beatEl = document.getElementById('metroBeat');
+  if (!beatEl) return;
+  let html = '';
+  for (let i = 0; i < meterNum; i++) {
+    const a = meterAccent(i);
+    const cls = a === 'strong' ? 'b-strong' : (a === 'mid' ? 'b-mid' : 'b-weak');
+    html += '<span class="bdot ' + cls + '"></span>';
+  }
+  beatEl.innerHTML = html;
+}
+// 拍号可自由输入，如 "4/4" "6/8" "5/4"
+function setMeter(v) {
+  v = (v || '').trim();
+  const m = v.match(/^(\d+)\s*\/\s*(\d+)$/);
+  if (!m) return; // 非法输入忽略，保留上一次
+  const n = Math.max(1, Math.min(12, parseInt(m[1], 10)));
+  const d = Math.max(1, Math.min(16, parseInt(m[2], 10)));
+  meterNum = n; meterDen = d;
+  const inp = document.getElementById('metroMeter');
+  if (inp && inp.value !== n + '/' + d) inp.value = n + '/' + d;
+  beatCount = 0;
+  renderBeat();
+  document.querySelectorAll('.metro-presets button').forEach(b => {
+    b.classList.toggle('active', b.textContent === n + '/' + d);
+  });
+}
+function metroTick() {
+  const pos = beatCount % meterNum;
+  const acc = meterAccent(pos);
+  clickSound(acc);
+  const beatEl = document.getElementById('metroBeat');
+  if (beatEl) {
+    const dots = beatEl.querySelectorAll('.bdot');
+    dots.forEach((d, i) => { d.classList.toggle('cur', i === pos); });
+  }
+  beatCount++;
+}
+function scheduleMetro() {
+  if (!metroOn) return;
+  metroTick();
+  metroTimer = setTimeout(scheduleMetro, 60000 / metroBpm);
+}
+function metroToggle() {
+  metroOn = !metroOn;
+  const btn = document.getElementById('metroPlay');
+  if (metroOn) {
+    ensureCtx();
+    if (metroCtx.state === 'suspended') metroCtx.resume();
+    beatCount = 0;
+    renderBeat();
+    scheduleMetro();
+    if (btn) btn.textContent = '⏸ 停止';
+  } else {
+    clearTimeout(metroTimer);
+    if (btn) btn.textContent = '▶ 开始';
+  }
+}
+function setMetroBpm(v) {
+  metroBpm = Math.max(40, Math.min(240, +v || 80));
+  const val = document.getElementById('metroBpmVal');
+  const rng = document.getElementById('metroRange');
+  if (val) val.textContent = metroBpm;
+  if (rng) rng.value = metroBpm;
+}
+function toggleMetronome() {
+  const m = document.getElementById('metro');
+  if (m) m.style.display = m.style.display === 'none' ? '' : 'none';
+}
+let tapTimes = [];
+function metroTap() {
+  const now = performance.now();
+  if (tapTimes.length && now - tapTimes[tapTimes.length - 1] > 2000) tapTimes = [];
+  tapTimes.push(now);
+  if (tapTimes.length > 4) tapTimes.shift();
+  if (tapTimes.length >= 2) {
+    const intervals = [];
+    for (let i = 1; i < tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i - 1]);
+    const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    setMetroBpm(Math.round(60000 / avg));
+  }
+}
+
+// ======================== 和弦悬浮提示 ========================
+const SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FLAT  = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+function chordInfo(name) {
+  const m = name.match(/^([A-G])([#b]?)(.*)$/);
+  if (!m) return null;
+  const root = m[1] + m[2];
+  const qual = m[3] || '';
+  let idx = SHARP.indexOf(root);
+  if (idx < 0) idx = FLAT.indexOf(root);
+  if (idx < 0) return null;
+  let iv, label;
+  if (/maj7|M7/.test(qual)) { iv = [0,4,7,11]; label = '大七和弦'; }
+  else if (/m7b5/.test(qual)) { iv = [0,3,6,10]; label = '半减七和弦'; }
+  else if (/m7/.test(qual)) { iv = [0,3,7,10]; label = '小七和弦'; }
+  else if (/9/.test(qual)) { iv = [0,4,7,10,14]; label = '属九和弦'; }
+  else if (/7/.test(qual)) { iv = [0,4,7,10]; label = '属七和弦'; }
+  else if (/6/.test(qual)) { iv = [0,4,7,9]; label = '六和弦'; }
+  else if (/sus4/.test(qual)) { iv = [0,5,7]; label = '挂四和弦'; }
+  else if (/sus2/.test(qual)) { iv = [0,2,7]; label = '挂二和弦'; }
+  else if (/add9/.test(qual)) { iv = [0,4,7,14]; label = '加九和弦'; }
+  else if (/dim/.test(qual)) { iv = [0,3,6]; label = '减三和弦'; }
+  else if (/aug|\+/.test(qual)) { iv = [0,4,8]; label = '增三和弦'; }
+  else if (/m/.test(qual)) { iv = [0,3,7]; label = '小三和弦'; }
+  else { iv = [0,4,7]; label = '大三和弦'; }
+  const notes = iv.map(i => SHARP[(idx + i) % 12]);
+  return { root: root, qual: qual, label: label, notes: notes };
+}
+const tip = document.getElementById('chordTip');
+let tipVisible = false;
+function showChordTip(text, e) {
+  const info = chordInfo(text);
+  if (!info) { hideChordTip(); return; }
+  tip.innerHTML = '<div class="ct-name">' + text + '</div><div class="ct-label">' + info.label + '</div><div class="ct-notes">' + info.notes.join(' · ') + '</div>';
+  tip.style.display = 'block';
+  tipVisible = true;
+  positionTip(e);
+}
+function positionTip(e) {
+  const x = Math.min(e.clientX + 14, window.innerWidth - 200);
+  const y = Math.min(e.clientY + 14, window.innerHeight - 100);
+  tip.style.left = x + 'px';
+  tip.style.top = y + 'px';
+}
+function hideChordTip() { tip.style.display = 'none'; tipVisible = false; }
+document.addEventListener('mouseover', e => { const el = e.target.closest('.measure-chord'); if (el) showChordTip(el.textContent, e); });
+document.addEventListener('mousemove', e => { if (tipVisible) positionTip(e); });
+document.addEventListener('mouseout', e => { const el = e.target.closest('.measure-chord'); if (el) hideChordTip(); });
+
+// ======================== 临时歌单拖拽排序 ========================
+let dragId = null;
+tbody.addEventListener('dragstart', e => {
+  const row = e.target.closest('.song-row');
+  if (!row) return;
+  dragId = +row.dataset.id;
+  row.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+});
+tbody.addEventListener('dragend', e => {
+  const row = e.target.closest('.song-row');
+  if (row) row.classList.remove('dragging');
+  document.querySelectorAll('.song-row.drag-over').forEach(r => r.classList.remove('drag-over'));
+  dragId = null;
+});
+tbody.addEventListener('dragover', e => {
+  if (currentTab !== 'temp' || dragId === null) return;
+  const row = e.target.closest('.song-row');
+  if (!row) return;
+  e.preventDefault();
+  document.querySelectorAll('.song-row.drag-over').forEach(r => r.classList.remove('drag-over'));
+  if (+row.dataset.id !== dragId) row.classList.add('drag-over');
+});
+tbody.addEventListener('drop', e => {
+  if (currentTab !== 'temp' || dragId === null) return;
+  e.preventDefault();
+  const row = e.target.closest('.song-row');
+  if (!row) return;
+  const overId = +row.dataset.id;
+  if (overId === dragId) return;
+  const from = tempList.indexOf(dragId), to = tempList.indexOf(overId);
+  if (from < 0 || to < 0) return;
+  tempList.splice(from, 1);
+  tempList.splice(to, 0, dragId);
+  render();
+});
+
+// ======================== 键盘快捷键 ========================
+document.addEventListener('keydown', e => {
+  const inp = document.getElementById('search');
+  if (e.key === 'Escape') {
+    if (inp.value) { inp.value = ''; searchTerm = ''; document.getElementById('searchClear').classList.remove('visible'); render(); }
+    inp.blur();
+  }
+});
+
+// ======================== 搜索（防抖） ========================
+let searchTimer = null;
+document.getElementById('search').addEventListener('input', e => {
+  const v = e.target.value.trim();
+  const clearBtn = document.getElementById('searchClear');
+  if (v) clearBtn.classList.add('visible'); else clearBtn.classList.remove('visible');
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { searchTerm = v; render(); }, 120);
+});
+
+// ======================== 初始化 ========================
+selectKeyButton(transposeKey);
+setMetroBpm(metroBpm);
+setMeter('4/4');
+updateStickyTop();
+window.addEventListener('resize', updateStickyTop);
+render();
+renderRefPanel();
+
+</script>
+
+
+
+</body></html>
