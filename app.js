@@ -803,6 +803,7 @@ function saveToGitHub() {
       // 重置改动基准，避免重复提示
       _initSnap.songs = JSON.parse(JSON.stringify(songs));
       _initSnap.progMap = JSON.parse(JSON.stringify(progMap));
+      // 保存成功后提示用户刷新页面以加载最新数据
       setTimeout(() => { if (status) status.textContent = ''; }, 4000);
     })
     .catch(err => {
@@ -1518,7 +1519,7 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 // ======================== 初始化（异步加载曲库数据后执行） ========================
-fetch('songs.json')
+fetch('songs.json?t=' + Date.now())
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(data => {
     songs = data.songs || [];
