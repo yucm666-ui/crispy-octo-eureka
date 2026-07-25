@@ -1522,17 +1522,34 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 // ======================== 初始化（异步加载曲库数据后执行） ========================
+// 加载策略：先从 CDN 加载（快），如果本地有 token 则用 GitHub API 读最新内容覆盖（绕过 CDN 缓存）
+function loadDataAndInit(data) {
+  songs = data.songs || [];
+  progMap = data.progMap || {};
+  selectKeyButton(transposeKey);
+  setMetroBpm(metroBpm);
+  setMeter('4/4');
+  updateStickyTop();
+  render();
+  renderRefPanel();
+}
 fetch('songs.json?t=' + Date.now(), { cache: 'no-store' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(data => {
-    songs = data.songs || [];
-    progMap = data.progMap || {};
-    selectKeyButton(transposeKey);
-    setMetroBpm(metroBpm);
-    setMeter('4/4');
-    updateStickyTop();
-    render();
-    renderRefPanel();
+    loadDataAndInit(data);
+    // 如果本地存有 token，用 GitHub API 读最新内容覆盖（绕过 CDN 缓存延迟）
+    const tok = localStorage.getItem('gh_token');
+    if (tok) {
+      fetch('https://api.github.com/repos/' + REPO + '/contents/songs.json', {
+        headers: { 'Authorization': 'token ' + tok }
+      })
+        .then(r => { if (!r.ok) throw new Error('API ' + r.status); return r.json(); })
+        .then(remote => {
+          const latest = JSON.parse(atob(remote.content));
+          loadDataAndInit(latest);
+        })
+        .catch(() => {}); // 静默失败，沿用 CDN 数据
+    }
   })
   .catch(err => console.error('加载 songs.json 失败：', err));
 
