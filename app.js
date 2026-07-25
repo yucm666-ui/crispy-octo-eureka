@@ -749,6 +749,7 @@ const SONGS_API = 'https://api.github.com/repos/' + REPO + '/contents/songs.json
 })();
 
 function utf8ToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
+function base64ToUtf8(str) { return decodeURIComponent(escape(atob(str))); }
 
 function getGhToken() {
   const inp = document.getElementById('ghToken');
@@ -781,7 +782,7 @@ function saveToGitHub() {
   fetch(SONGS_API, { headers: { 'Authorization': 'token ' + token } })
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(remote => {
-      const remoteData = JSON.parse(atob(remote.content));
+      const remoteData = JSON.parse(base64ToUtf8(remote.content));
       const merged = {
         songs: mergeSongs(remoteData.songs || [], songs),
         progMap: mergeProg(remoteData.progMap || {}, progMap)
@@ -1545,7 +1546,7 @@ fetch('songs.json?t=' + Date.now(), { cache: 'no-store' })
       })
         .then(r => { if (!r.ok) throw new Error('API ' + r.status); return r.json(); })
         .then(remote => {
-          const latest = JSON.parse(atob(remote.content));
+          const latest = JSON.parse(base64ToUtf8(remote.content));
           loadDataAndInit(latest);
         })
         .catch(() => {}); // 静默失败，沿用 CDN 数据
