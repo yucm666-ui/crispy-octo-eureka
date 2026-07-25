@@ -1183,7 +1183,7 @@
 
 <div class="metro" id="metro" style="display:none;">
   <div class="metro-head"><span>🎵 节拍器</span><button class="metro-x" onclick="toggleMetronome()">×</button></div>
-  <div class="metro-bpm"><input type="number" id="metroBpmInput" min="40" max="240" value="80" oninput="setMetroBpm(this.value)" onclick="this.select()"> <small>BPM</small></div>
+  <div class="metro-bpm"><input type="number" id="metroBpmInput" min="40" max="240" value="80" oninput="onMetroBpmInput(this.value)" onblur="setMetroBpm(this.value)" onclick="this.select()"> <small>BPM</small></div>
   <input type="range" id="metroRange" min="40" max="240" value="80" oninput="setMetroBpm(this.value)">
   <div class="metro-meter">
     <div class="metro-meter-label">拍号（可自由输入，如 4/4 · 3/4 · 6/8 · 5/4 · 7/8）</div>
@@ -2515,6 +2515,16 @@ function metroToggle() {
     if (btn) btn.textContent = '▶ 开始';
   }
 }
+// 输入过程中：只更新实际值和滑块，不回写输入框，允许自由编辑（如退格清空）
+function onMetroBpmInput(v) {
+  const n = +v;
+  if (n >= 40 && n <= 240) {
+    metroBpm = n;
+    const rng = document.getElementById('metroRange');
+    if (rng) rng.value = metroBpm;
+  }
+}
+// 失焦时：clamp 并回写输入框，确保合法值
 function setMetroBpm(v) {
   metroBpm = Math.max(40, Math.min(240, +v || 80));
   const inp = document.getElementById('metroBpmInput');
