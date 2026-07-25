@@ -794,16 +794,19 @@ function saveToGitHub() {
           content: utf8ToBase64(JSON.stringify(merged, null, 0)),
           sha: remote.sha
         })
-      });
+      }).then(r2 => { if (!r2.ok) throw new Error('HTTP ' + r2.status); return r2.json(); }).then(() => merged);
     })
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(() => {
-      if (status) { status.textContent = '✅ 已保存到 GitHub'; status.style.color = '#3fb950'; }
-      if (btn) btn.disabled = false;
-      // 重置改动基准，避免重复提示
+    .then(merged => {
+      // 保存成功后直接用合并数据更新内存并重新渲染（无需刷新页面，绕过 CDN 缓存）
+      songs = merged.songs;
+      progMap = merged.progMap;
       _initSnap.songs = JSON.parse(JSON.stringify(songs));
       _initSnap.progMap = JSON.parse(JSON.stringify(progMap));
-      // 保存成功后提示用户刷新页面以加载最新数据
+      render();
+      renderRefPanel();
+      if (currentDetailId) renderDetail();
+      if (status) { status.textContent = '✅ 已保存到 GitHub'; status.style.color = '#3fb950'; }
+      if (btn) btn.disabled = false;
       setTimeout(() => { if (status) status.textContent = ''; }, 4000);
     })
     .catch(err => {
