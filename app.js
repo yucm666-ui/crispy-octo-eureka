@@ -1522,7 +1522,7 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 // ======================== 初始化（异步加载曲库数据后执行） ========================
-fetch('songs.json?t=' + Date.now())
+fetch('songs.json?t=' + Date.now(), { cache: 'no-store' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(data => {
     songs = data.songs || [];
