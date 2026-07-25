@@ -784,9 +784,17 @@ function saveToGitHub() {
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(remote => {
       const remoteData = JSON.parse(base64ToUtf8(remote.content));
+      // 合并备注：远程为基底 + 本地修改；空值不写入（视为删除）
+      const mergedNotes = Object.assign({}, remoteData.sectionNotes || {});
+      Object.keys(_sectionNotes).forEach(k => {
+        const v = (_sectionNotes[k] || '').trim();
+        if (v) mergedNotes[k] = v;
+        else delete mergedNotes[k];
+      });
       const merged = {
         songs: mergeSongs(remoteData.songs || [], songs),
-        progMap: mergeProg(remoteData.progMap || {}, progMap)
+        progMap: mergeProg(remoteData.progMap || {}, progMap),
+        sectionNotes: mergedNotes
       };
       return fetch(SONGS_API, {
         method: 'PUT',
@@ -802,6 +810,9 @@ function saveToGitHub() {
       // 保存成功后直接用合并数据更新内存并重新渲染（无需刷新页面，绕过 CDN 缓存）
       songs = merged.songs;
       progMap = merged.progMap;
+      // 同步备注：用合并后的 sectionNotes 更新内存
+      Object.keys(_sectionNotes).forEach(k => { if (!(k in (merged.sectionNotes || {}))) delete _sectionNotes[k]; });
+      Object.assign(_sectionNotes, merged.sectionNotes || {});
       resetInitSnap();
       render();
       renderRefPanel();
@@ -1527,6 +1538,15 @@ document.getElementById('search').addEventListener('input', e => {
 function loadDataAndInit(data) {
   songs = data.songs || [];
   progMap = data.progMap || {};
+  // 合并远程备注：以远程 sectionNotes 为基底，叠加本地未保存的修改
+  if (data.sectionNotes && typeof data.sectionNotes === 'object') {
+    // 远程有备注数据，用远程覆盖内置默认值，再叠加当前内存中可能有的新增/修改
+    const remoteNotes = data.sectionNotes;
+    const curNotes = Object.assign({}, _sectionNotes); // 当前内存中的备注（含未保存修改）
+    // 先清空再重建：远程为主，本地修改覆盖
+    Object.keys(_sectionNotes).forEach(k => { if (!(k in remoteNotes)) delete _sectionNotes[k]; });
+    Object.assign(_sectionNotes, remoteNotes, curNotes);
+  }
   selectKeyButton(transposeKey);
   setMetroBpm(metroBpm);
   setMeter('4/4');
