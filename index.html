@@ -210,6 +210,16 @@
       <button class="btn primary" id="exportCopyBtn" onclick="copyExport()">📋 复制文本</button>
       <button class="btn outline" onclick="downloadExport()">💾 下载 txt</button>
     </div>
+    <div class="save-github">
+      <div class="save-row">
+        <input type="password" id="ghToken" class="gh-token" placeholder="GitHub Token（需 repo 权限）" autocomplete="off">
+        <label class="gh-remember"><input type="checkbox" id="ghRemember"> 记住</label>
+      </div>
+      <div class="save-row">
+        <button class="btn primary" id="ghSaveBtn" onclick="saveToGitHub()">☁ 保存到 GitHub</button>
+        <span id="ghSaveStatus" class="gh-status"></span>
+      </div>
+    </div>
   </div>
 </div>
 

@@ -691,6 +691,14 @@
 .export-actions .btn:hover { opacity:.88; }
 .export-actions .btn.ok { background:#238636; border-color:#238636; color:#fff; }
 
+/* GitHub 直接保存区 */
+.save-github { margin:0 18px 16px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:10px; }
+.save-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.gh-token { flex:1 1 auto; min-width:160px; padding:8px 10px; background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); font-size:13px; outline:none; }
+.gh-token:focus { border-color:var(--accent); }
+.gh-remember { font-size:12px; color:var(--text-dim); display:flex; align-items:center; gap:4px; cursor:pointer; white-space:nowrap; }
+.gh-status { font-size:12px; color:var(--text-dim); }
+
 /* 和弦悬浮提示 */
 .chord-tip { position:fixed; display:none; z-index:300; background:var(--surface); border:1px solid var(--accent); border-radius:10px; padding:8px 12px; box-shadow:0 8px 28px rgba(0,0,0,.5); pointer-events:none; max-width:190px; }
 .ct-name { font-size:16px; font-weight:700; color:var(--accent); font-family:'Consolas','Monaco',monospace; }

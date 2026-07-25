@@ -731,6 +731,89 @@ function downloadExport() {
   URL.revokeObjectURL(url);
 }
 
+// ======================== 网页直接保存上传到 GitHub ========================
+// 仓库信息：从 GitHub Pages URL 解析（owner.github.io/repo），失败回退硬编码
+const REPO = (() => {
+  const m = location.hostname.match(/^([^.]+)\.github\.io$/);
+  const repo = (location.pathname.split('/')[1] || '').replace(/\/$/, '');
+  if (m && repo) return m[1] + '/' + repo;
+  return 'yucm666-ui/crispy-octo-eureka';
+})();
+const SONGS_API = 'https://api.github.com/repos/' + REPO + '/contents/songs.json';
+
+// 页面加载时回填已记住的 token
+(function () {
+  const t = localStorage.getItem('gh_token');
+  const inp = document.getElementById('ghToken');
+  if (t && inp) inp.value = t;
+})();
+
+function utf8ToBase64(str) { return btoa(unescape(encodeURIComponent(str))); }
+
+function getGhToken() {
+  const inp = document.getElementById('ghToken');
+  return ((inp && inp.value) || '').trim() || (localStorage.getItem('gh_token') || '');
+}
+
+// 以远程为基底，应用内存改动（避免覆盖他人新增的歌）
+function mergeSongs(remote, mem) {
+  const byId = {};
+  mem.forEach(s => { byId[s.id] = s; });
+  const kept = remote.map(r => byId[r.id] ? Object.assign({}, r, byId[r.id]) : r);
+  const added = mem.filter(m => !remote.find(r => r.id === m.id));
+  return kept.concat(added);
+}
+function mergeProg(remote, mem) {
+  const out = Object.assign({}, remote);
+  Object.keys(mem).forEach(k => { if (mem[k] !== undefined) out[k] = mem[k]; });
+  return out;
+}
+
+function saveToGitHub() {
+  const token = getGhToken();
+  const status = document.getElementById('ghSaveStatus');
+  const btn = document.getElementById('ghSaveBtn');
+  if (!token) { if (status) { status.textContent = '请先填入 GitHub Token'; status.style.color = '#f85149'; } return; }
+  if (document.getElementById('ghRemember') && document.getElementById('ghRemember').checked) localStorage.setItem('gh_token', token);
+  if (btn) btn.disabled = true;
+  if (status) { status.textContent = '保存中…'; status.style.color = ''; }
+
+  fetch(SONGS_API, { headers: { 'Authorization': 'token ' + token } })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(remote => {
+      const remoteData = JSON.parse(atob(remote.content));
+      const merged = {
+        songs: mergeSongs(remoteData.songs || [], songs),
+        progMap: mergeProg(remoteData.progMap || {}, progMap)
+      };
+      return fetch(SONGS_API, {
+        method: 'PUT',
+        headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: '更新歌单（网页保存）',
+          content: utf8ToBase64(JSON.stringify(merged, null, 0)),
+          sha: remote.sha
+        })
+      });
+    })
+    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+    .then(() => {
+      if (status) { status.textContent = '✅ 已保存到 GitHub'; status.style.color = '#3fb950'; }
+      if (btn) btn.disabled = false;
+      // 重置改动基准，避免重复提示
+      _initSnap.songs = JSON.parse(JSON.stringify(songs));
+      _initSnap.progMap = JSON.parse(JSON.stringify(progMap));
+      setTimeout(() => { if (status) status.textContent = ''; }, 4000);
+    })
+    .catch(err => {
+      if (btn) btn.disabled = false;
+      let msg = '保存失败：' + err.message;
+      if (/401|403/.test(err.message)) msg = 'Token 无效或无写权限';
+      else if (/409/.test(err.message)) msg = '远程有更新，请刷新页面后重试';
+      if (status) { status.textContent = msg; status.style.color = '#f85149'; }
+    });
+}
+
 // 转调：固定初始选调 C（与 HTML 默认高亮一致），不持久化
 transposeKey = 'C';
 currentOrigKey = null;
