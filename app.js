@@ -601,7 +601,7 @@ function sectionHtml(s, k, val, label, inEdit) {
     const showDel = !isProg; // 固定与自定义模块均可删除（对照表 prog 已在 !s.pinned 处被排除）
     const delBtn = showDel ? '<button class="section-del" title="移除该模块" onclick="removeSection(' + s.id + ',\'' + k + '\')">✕</button>' : '';
     const dragHandle = '<span class="section-drag" title="拖动排序" draggable="true" ondragstart="dragSectionStart(event,' + s.id + ',\'' + k + '\')" ondragend="dragSectionEnd(event)">≡</span>';
-    return '<div class="prog-section edit" data-sec-key="' + k + '" ondragover="dragSectionOver(event)" ondragleave="dragSectionLeave(event)" ondrop="dragSectionDrop(event,' + s.id + ')">' + dragHandle + '<div class="sec-edit-head">' + delBtn + nameField + '</div>' + editField + '</div>' + noteHtml;
+    return '<div class="prog-section edit" data-sec-key="' + k + '" ondragover="dragSectionOver(event)" ondragleave="dragSectionLeave(event)" ondrop="dragSectionDrop(event,' + s.id + ')">' + dragHandle + '<div class="sec-edit-head">' + delBtn + nameField + '</div>' + editField + noteHtml + '</div>';
   }
 
   // 普通模式：数字级数 + 字母和弦网格（按拍号分子均分每小节）
