@@ -632,13 +632,14 @@ let tempList = INITIAL_TEMP.slice();
 // songs：直接使用文件内联初始数据，编辑仅存于内存
 
 // ======================== 导出修改指令（供助手回填 HTML）========================
-// 页面加载时对四类可编辑数据拍一份初始快照，导出时做 diff，只导出真正改动的部分。
-const _initSnap = {
-  tempList: INITIAL_TEMP.slice(),
-  songs: JSON.parse(JSON.stringify(songs)),
-  progMap: JSON.parse(JSON.stringify(progMap)),
-  notes: JSON.parse(JSON.stringify(_sectionNotes))
-};
+// 初始快照：在数据加载完成后通过 resetInitSnap() 拍照，导出时做 diff，只导出真正改动的部分。
+const _initSnap = { tempList: [], songs: [], progMap: {}, notes: {} };
+function resetInitSnap() {
+  _initSnap.tempList = INITIAL_TEMP.slice();
+  _initSnap.songs = JSON.parse(JSON.stringify(songs));
+  _initSnap.progMap = JSON.parse(JSON.stringify(progMap));
+  _initSnap.notes = JSON.parse(JSON.stringify(_sectionNotes));
+}
 const _eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 // 构建导出数据对象：仅包含相对初始状态发生变化的字段
@@ -801,8 +802,7 @@ function saveToGitHub() {
       // 保存成功后直接用合并数据更新内存并重新渲染（无需刷新页面，绕过 CDN 缓存）
       songs = merged.songs;
       progMap = merged.progMap;
-      _initSnap.songs = JSON.parse(JSON.stringify(songs));
-      _initSnap.progMap = JSON.parse(JSON.stringify(progMap));
+      resetInitSnap();
       render();
       renderRefPanel();
       if (currentDetailId) renderDetail();
@@ -1086,7 +1086,7 @@ function updateEditBtn() {
   if (b) {
     if (editMode) {
       b.className = 'btn primary';
-      b.textContent = '💾 保存并推导级数';
+      b.textContent = '💾 暂存';
       b.onclick = () => saveChordEdit(currentDetailId);
     } else {
       b.className = 'btn outline';
@@ -1533,6 +1533,7 @@ function loadDataAndInit(data) {
   updateStickyTop();
   render();
   renderRefPanel();
+  resetInitSnap(); // 数据加载完成后拍初始快照，供导出 diff 使用
 }
 fetch('songs.json?t=' + Date.now(), { cache: 'no-store' })
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
