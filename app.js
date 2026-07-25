@@ -129,6 +129,24 @@ function splitChordTokens(str) {
   return out;
 }
 
+// 把一段级数串拆成符号数组（每个符号=1拍），结构同 splitChordTokens，使其与和弦行 token 一一对齐。
+// 规则：'-' 即为一个占拍/延音符号；'r' 视为休止占位（跳过，与 chord 行 '-' 对齐）；
+// 数字级数（如 1, 5, 1b3, 3#5, 5/7, 5/E）按边界切分。这样 '6-5'→['6','-','5'] 与 chord ['Am','-','G'] 对齐。
+function splitDegreeTokens(str) {
+  const re = /[b#]?\d(?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?(?:\/[A-G][#b]*|\/\d+)?/g;
+  const s = String(str == null ? '' : str);
+  const out = [];
+  let i = 0;
+  while (i < s.length) {
+    if (s[i] === '-') { out.push('-'); i++; continue; }   // 占拍/延音
+    re.lastIndex = i;
+    const m = re.exec(s);
+    if (m && m.index === i && m[0]) { out.push(m[0]); i = re.lastIndex; }
+    else { i++; }   // 跳过非级数字符（r 休止、空格等）
+  }
+  return out;
+}
+
 // 把级数串里的字母低音（如 5/E 的 E）换算成相对原调的级数低音（如 5/7），使级数行与和弦行结构一致
 function letterBassToDegree(letter, origKey) {
   const target = NOTE_NORM[letter];
@@ -152,27 +170,42 @@ function bassLetterToDegreeStr(numToken, origKey) {
   return main + '/' + letterBassToDegree(bass, origKey);
 }
 
-// 渲染一个小节内 N 个拍格（N=拍号分子）。纯顺序定位：每个符号占一拍、从左到右，
-// 空符号（休止）以 "-" 填充。级数(numStr)与和弦(chordStr)按位置一一对应。
+// 渲染一个小节内 N 个拍格（N=拍号分子）。
+// 规则：小节内的有效和弦（忽略 '-'/'r' 休止占位）按数量平分 N 拍，每个和弦占 N/k 拍
+// （余数分给前几个和弦各多1拍）；首拍显示级数+和弦，后续拍显示延续(空)。
+// 这样 '6-5'(2和弦)→各2拍 'Am - G -'，'1-5-4-1'(4和弦)→各1拍 'C G F C'，'1-r-5-r'→'C - G -'。
 function measureCellsHtml(numStr, chordStr, beats, origKey) {
-  const nums = String(numStr == null ? '' : numStr).split('-').map(s => s.trim());
-  // 字母串用 splitChordTokens 切分：'-' 是休止符（自身即一个符号），需保留为休止而非分隔符
-  const chords = splitChordTokens(chordStr).map(s => s === '-' ? '' : s.trim());
-  // 级数行：把字母低音（如 5/E 的 E）按原调换算成级数低音（5/7），使级数行与和弦行结构一致
-  const numDegs = nums.map(n => bassLetterToDegreeStr(n, origKey));
+  const numSyms = splitDegreeTokens(numStr).map(s => (s === '-' || s === 'r') ? '' : s.trim());
+  const chordSyms = splitChordTokens(chordStr).map(s => (s === '-' || s === 'r') ? '' : s.trim());
+  // 有效和弦（非休止）索引，使级数行与和弦行结构一致
+  const chordIdx = [];
+  for (let i = 0; i < chordSyms.length; i++) if (chordSyms[i]) chordIdx.push(i);
+  const k = chordIdx.length || 1;
+  // 平分 beats 拍：每和弦 base 拍，余数分给前 rem 个和弦各多1拍
+  const spans = [];
+  let rem = beats % k, base = Math.floor(beats / k);
+  for (let j = 0; j < k; j++) spans.push(base + (j < rem ? 1 : 0));
+  const starts = [];
+  let acc = 0;
+  for (let j = 0; j < k; j++) { starts.push(acc); acc += spans[j]; }
   let html = '';
   for (let i = 0; i < beats; i++) {
-    const c = (i < chords.length) ? chords[i] : '';   // 超出符号数则视为休止
-    const nRaw = (c && i < numDegs.length) ? numDegs[i] : '';  // 休止拍不显示级数
+    let j = 0;
+    while (j < k - 1 && i >= starts[j] + spans[j]) j++;
+    const sym = chordIdx[j];
+    const c = chordSyms[sym] || '';
+    const isFirst = (i === starts[j]);
+    const nRaw = isFirst ? (numSyms[sym] ? bassLetterToDegreeStr(numSyms[sym], origKey) : '') : '';
     // 级数后缀（sus/maj/min/dim/aug/add 等）用小字；转位 /X 不缩小
     const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/\d+)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
     // 和弦字母行同步：转位 /X 不缩小
     const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:maj\d*|min|m\d*|m|M|dim|aug|sus\d*|add\d*|\+|\d+)?)(\/[A-G][#b]*)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
-    html += '<div class="beat' + (c ? ' has-chord' : ' rest') + '">'
+    const isRest = !c;
+    html += '<div class="beat ' + (isRest ? 'rest' : 'has-chord') + '">'
       + (nHtml ? '<div class="measure-num">' + nHtml + '</div>' : '')
-      + '<div class="measure-chord' + (c ? '' : ' rest-mark') + '">' + (c ? chordHtml : '-') + '</div>'
+      + '<div class="measure-chord' + (isRest ? ' rest-mark' : '') + '">' + (isRest ? '-' : chordHtml) + '</div>'
       + '</div>';
   }
   return html;
@@ -216,8 +249,9 @@ function convertToken(token, chords, keyIdx, origKey) {
       }
     }
   }
-  // 休止符：'r' 或空 token 在度数串中代表空拍
-  if (token === 'r' || token === '') return '-';
+  // 休止符：'r' 或空 token 在度数串中代表空拍。
+  // 返回 ''（空串），由 numToChord 的 join('-') 自然形成占拍分隔，避免 'r'→'-' 再叠加 join 的 '-' 产生双连字符。
+  if (token === 'r' || token === '') return '';
   // 主部分转换
   const m = mainPart.match(/^([b#]?)(\d)(.*)$/);
   if (!m) return token;
@@ -239,9 +273,10 @@ function numToChord(progStr, key, origKey) {
   if (!chords) return '';
   const keyIdx = (NOTE_NORM[key] != null) ? NOTE_NORM[key] : -1;
   const oKey = (origKey != null) ? origKey : key;
-  // 按 | 分段处理小节；小节内每个符号（和弦或休止 '-'）占一拍，直接拼接（休止即一个 '-'）
+  // 按 | 分段处理小节；小节内每个符号（和弦或休止 '-'）占一拍，用 '-' 连接保留占拍占位，
+  // 使生成的字母串与 splitChordTokens 的解析一致（'-' 本身即一个占拍符号）
   return progStr.split('|').map(section => {
-    return section.split('-').map(token => convertToken(token, chords, keyIdx, oKey)).join('');
+    return section.split('-').map(token => convertToken(token, chords, keyIdx, oKey)).join('-');
   }).join('|');
 }
 
