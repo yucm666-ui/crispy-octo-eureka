@@ -596,11 +596,6 @@ function sectionHtml(s, k, val, label, inEdit) {
   const hasCustom = !!(progMap[s.id] && progMap[s.id].nm && progMap[s.id].nm[k]);
   // 普通模式：无和弦且无自定义名称则不渲染；编辑模式则始终渲染（便于改名/新增）
   if (!val && !hasCustom && !inEdit) return '';
-  const noteVal = getSectionNote(s.id, k);
-  const notePh = isProg
-    ? ('备注：' + ((s.progs && s.progs[parseInt(k.slice(4))]) ? s.progs[parseInt(k.slice(4))].n : ''))
-    : defaultSectionNote(s, k);
-  const noteHtml = '<div class="section-note" onclick="event.stopPropagation()"><textarea class="section-note-input" id="note-' + s.id + '-' + k + '" placeholder="' + escAttr(notePh) + '" oninput="autoGrow(this);saveSectionNote(' + s.id + ',\'' + k + '\',this.value)" rows="1">' + noteVal + '</textarea></div>';
 
   if (inEdit && !s.pinned) {
     // 编辑模式：模块名称可输入、和弦以字母形式可改；空模块也渲染以便新增/命名
@@ -611,7 +606,7 @@ function sectionHtml(s, k, val, label, inEdit) {
     const showDel = !isProg; // 固定与自定义模块均可删除（对照表 prog 已在 !s.pinned 处被排除）
     const delBtn = showDel ? '<button class="section-del" title="移除该模块" onclick="removeSection(' + s.id + ',\'' + k + '\')">✕</button>' : '';
     const dragHandle = '<span class="section-drag" title="拖动排序" draggable="true" ondragstart="dragSectionStart(event,' + s.id + ',\'' + k + '\')" ondragend="dragSectionEnd(event)">≡</span>';
-    return '<div class="prog-section edit" data-sec-key="' + k + '" ondragover="dragSectionOver(event)" ondragleave="dragSectionLeave(event)" ondrop="dragSectionDrop(event,' + s.id + ')">' + dragHandle + '<div class="sec-edit-head">' + delBtn + nameField + '</div>' + editField + noteHtml + '</div>';
+    return '<div class="prog-section edit" data-sec-key="' + k + '" ondragover="dragSectionOver(event)" ondragleave="dragSectionLeave(event)" ondrop="dragSectionDrop(event,' + s.id + ')">' + dragHandle + '<div class="sec-edit-head">' + delBtn + nameField + '</div>' + editField + '</div>';
   }
 
   // 普通模式：数字级数 + 字母和弦网格（按拍号分子均分每小节）+ 每小节歌词
@@ -626,7 +621,7 @@ function sectionHtml(s, k, val, label, inEdit) {
       '<div class="measure-lyrics" onclick="event.stopPropagation()"><textarea class="lyrics-input" id="lyrics-' + s.id + '-' + k + '-' + idx + '" placeholder="歌词" oninput="autoGrow(this);saveSectionLyrics(' + s.id + ',\'' + k + '\',' + idx + ',this.value)" rows="1">' + escAttr(lyricsVal) + '</textarea></div>' +
     '</div>';
   }).join('');
-  return '<div class="prog-section"><span class="prog-label">' + escAttr(effLabel) + '</span><div class="prog-measures">' + cells + '</div>' + noteHtml + '</div>';
+  return '<div class="prog-section"><span class="prog-label">' + escAttr(effLabel) + '</span><div class="prog-measures">' + cells + '</div></div>';
 }
 
 // ======================== 渲染逻辑（升级版 v3 · 精简） ========================
@@ -1099,7 +1094,7 @@ function renderDetail() {
   html += (!hasProg && customKeys.length === 0 ? '<span class="prog-empty">暂无和弦走向数据</span>' : '');
   html += '</div>';
   bodyEl.innerHTML = html;
-  bodyEl.querySelectorAll('.section-note-input, .lyrics-input').forEach(el => autoGrow(el));
+  bodyEl.querySelectorAll('.lyrics-input').forEach(el => autoGrow(el));
   updateEditBtn();
 }
 // 关闭详情区，回到歌曲列表

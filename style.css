@@ -45,7 +45,7 @@
     align-items: center;
   }
   .search-box {
-    flex: 1 1 auto;
+    flex: 0 0 220px;
     min-width: 100px;
     max-width: 320px;
     position: relative;
@@ -116,6 +116,15 @@
   .btn.outline:hover {
     border-color: var(--accent);
     color: var(--text);
+  }
+  /* 工具栏右侧两个操作按钮（节拍器 / 导出·保存到GitHub）撑满当前行右侧 */
+  .toolbar-top > .btn.outline {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
   .table-wrap {
     padding: 0 16px 28px;
@@ -602,35 +611,6 @@
     color: #fff;
     opacity: 0.85;
   }
-  .section-note {
-    margin-top: 3px;
-  }
-  .section-note-input {
-    width: 100%;
-    padding: 5px 8px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    color: var(--text);
-    font-size: 12px;
-    font-family: -apple-system, 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
-    outline: none;
-    transition: border-color 0.2s, background 0.2s;
-    line-height: 1.5;
-    resize: none;
-    overflow: hidden;
-    min-height: 28px;
-    box-sizing: border-box;
-  }
-  .section-note-input:focus {
-    border-color: var(--accent);
-    background: rgba(255,255,255,0.06);
-  }
-  .section-note-input::placeholder {
-    color: var(--text-dim);
-    opacity: 0.5;
-    font-size: 11px;
-  }
   /* ===== 每小节歌词区（宽度与和弦小节一致；小节间用虚线分割，连成一条连续歌词行） ===== */
   .measure-lyrics {
     margin-top: 1px;
@@ -752,7 +732,7 @@
 @media (prefers-color-scheme: light) {
   :root { --bg:#f4f6f8; --surface:#ffffff; --surface-hover:#eef2f6; --border:#d8dee4; --text:#1f2328; --text-dim:#626b75; --accent:#1f6feb; --accent-dim:#1f6feb; }
   .ref-panel { background:#fafbfc; }
-  .search-box input, .section-note-input { background:#fff; }
+  .search-box input { background:#fff; }
   .key-btn { background:rgba(0,0,0,.03); color:var(--text); }
   .measure { background:rgba(31,111,235,.05); }
 }
@@ -855,9 +835,6 @@
   background: rgba(63,185,80,0.12);
 }
 .prog-section.edit { gap: 4px; }
-/* 编辑模式下备注区是 .prog-section.edit 的并列节点（直接位于 .prog-detail flex 容器中）：
-   让它占满整行，宽度与上方和弦输入框(.edit-chords)保持一致；并抵消部分容器 gap 使其贴近所属模块 */
-.prog-detail > .section-note { flex: 0 0 100%; max-width: 100%; margin-top: -4px; }
 .sec-edit-head { display: flex; align-items: center; gap: 6px; }
 .section-label-input {
   flex: 1 1 auto;
