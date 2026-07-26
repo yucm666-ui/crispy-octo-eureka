@@ -242,12 +242,17 @@
     margin-top: 1px;
   }
   .measure {
-    padding: 1px 4px;
-    border-right: 1px solid rgba(88,166,255,0.15);
+    padding: 2px 4px 3px;
     border-bottom: 1px dashed rgba(63,185,80,0.3);
     text-align: center;
     display: flex;
+    flex-direction: column;   /* 拍格区在上，歌词区在下 */
     align-items: stretch;
+  }
+  .measure-beats {
+    display: flex;            /* 和弦拍格横向排列（保持原样） */
+    align-items: stretch;
+    border-right: 1px dashed rgba(88,166,255,0.15);  /* 上下两区同用虚线，视觉连续 */
   }
   .beat {
     flex: 1 1 auto;
@@ -625,6 +630,39 @@
     color: var(--text-dim);
     opacity: 0.5;
     font-size: 11px;
+  }
+  /* ===== 每小节歌词区（宽度与和弦小节一致；小节间用虚线分割，连成一条连续歌词行） ===== */
+  .measure-lyrics {
+    margin-top: 1px;
+  }
+  .lyrics-input {
+    width: 100%;
+    padding: 3px 6px;
+    background: transparent;
+    border: none;
+    border-left: 1px dashed rgba(88,166,255,0.15);  /* 与和弦小节分割线同色虚线 */
+    border-right: 1px dashed rgba(88,166,255,0.15);
+    border-radius: 0;
+    color: rgba(240,246,252,0.88);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    outline: none;
+    transition: background 0.2s;
+    line-height: 1.4;
+    resize: none;
+    overflow: hidden;
+    min-height: 24px;
+    box-sizing: border-box;
+    text-align: left;
+  }
+  .lyrics-input:focus {
+    background: rgba(88,166,255,0.08);
+  }
+  .lyrics-input::placeholder {
+    color: var(--text-dim);
+    opacity: 0.4;
+    font-size: 10px;
   }
   @media (max-width: 700px) {
     .prog-detail { flex-direction: column; }

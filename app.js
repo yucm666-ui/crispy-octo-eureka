@@ -564,6 +564,16 @@ function getSectionNote(id, section) {
 function saveSectionNote(id, section, val) {
   _sectionNotes[id + '_' + section] = val;
 }
+// 歌词：按小节存储（measureIdx 从 0 开始），独立于备注，内存存储
+const _sectionLyrics = {};
+function getSectionLyrics(id, section, measureIdx) {
+  return _sectionLyrics[id + '_' + section + '_' + measureIdx] || '';
+}
+function saveSectionLyrics(id, section, measureIdx, val) {
+  const key = id + '_' + section + '_' + measureIdx;
+  if (val && val.trim()) _sectionLyrics[key] = val;
+  else delete _sectionLyrics[key];
+}
 // 备注输入框自动撑高（无下拉条）
 function autoGrow(el) {
   el.style.height = '28px';
@@ -604,12 +614,18 @@ function sectionHtml(s, k, val, label, inEdit) {
     return '<div class="prog-section edit" data-sec-key="' + k + '" ondragover="dragSectionOver(event)" ondragleave="dragSectionLeave(event)" ondrop="dragSectionDrop(event,' + s.id + ')">' + dragHandle + '<div class="sec-edit-head">' + delBtn + nameField + '</div>' + editField + noteHtml + '</div>';
   }
 
-  // 普通模式：数字级数 + 字母和弦网格（按拍号分子均分每小节）
+  // 普通模式：数字级数 + 字母和弦网格（按拍号分子均分每小节）+ 每小节歌词
   const effKey = effectiveChordKey(s.key);
   const chordStr = val ? numToChord(val, effKey, s.key) : '';
   const beats = numeratorOf(s.timeSig);
   const measures = val ? parseMeasures(val, chordStr, beats) : [];
-  const cells = measures.map(m => '<div class="measure">' + measureCellsHtml(m.num, m.chord, beats, s.key) + '</div>').join('');
+  const cells = measures.map((m, idx) => {
+    const lyricsVal = getSectionLyrics(s.id, k, idx);
+    return '<div class="measure">' +
+      '<div class="measure-beats">' + measureCellsHtml(m.num, m.chord, beats, s.key) + '</div>' +
+      '<div class="measure-lyrics" onclick="event.stopPropagation()"><textarea class="lyrics-input" id="lyrics-' + s.id + '-' + k + '-' + idx + '" placeholder="歌词" oninput="autoGrow(this);saveSectionLyrics(' + s.id + ',\'' + k + '\',' + idx + ',this.value)" rows="1">' + escAttr(lyricsVal) + '</textarea></div>' +
+    '</div>';
+  }).join('');
   return '<div class="prog-section"><span class="prog-label">' + escAttr(effLabel) + '</span><div class="prog-measures">' + cells + '</div>' + noteHtml + '</div>';
 }
 
@@ -1061,7 +1077,7 @@ function renderDetail() {
   html += (!hasProg && customKeys.length === 0 ? '<span class="prog-empty">暂无和弦走向数据</span>' : '');
   html += '</div>';
   bodyEl.innerHTML = html;
-  bodyEl.querySelectorAll('.section-note-input').forEach(el => autoGrow(el));
+  bodyEl.querySelectorAll('.section-note-input, .lyrics-input').forEach(el => autoGrow(el));
   updateEditBtn();
 }
 // 关闭详情区，回到歌曲列表
