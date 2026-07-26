@@ -1353,17 +1353,33 @@ function updateStickyTop() {
 // ======================== 节拍器（Web Audio · 拍号自由输入） ========================
 let metroCtx = null, metroTimer = null, metroOn = false, metroBpm = 80, beatCount = 0;
 let meterNum = 4, meterDen = 4;
+let metroVol = 100;   // 音量百分比（20–300），乘到各拍增益上；>200 会硬削波（舞台更响但略失真）
 function ensureCtx() { if (!metroCtx) metroCtx = new (window.AudioContext || window.webkitAudioContext)(); }
 function clickSound(acc) {
   ensureCtx();
   const freq = acc === 'strong' ? 1500 : (acc === 'mid' ? 1100 : 800);
-  const gain = acc === 'strong' ? 0.5 : (acc === 'mid' ? 0.4 : 0.3);
+  const base = acc === 'strong' ? 0.5 : (acc === 'mid' ? 0.4 : 0.3);
+  const gain = base * (metroVol / 100);
   const o = metroCtx.createOscillator(), g = metroCtx.createGain();
   o.frequency.value = freq;
   g.gain.setValueAtTime(gain, metroCtx.currentTime);
   g.gain.exponentialRampToValueAtTime(0.001, metroCtx.currentTime + 0.05);
   o.connect(g); g.connect(metroCtx.destination);
   o.start(); o.stop(metroCtx.currentTime + 0.05);
+}
+function setMetroVol(v) {
+  metroVol = Math.max(20, Math.min(300, +v || 100));
+  const lbl = document.getElementById('metroVolVal');
+  if (lbl) lbl.textContent = metroVol + '%';
+  localStorage.setItem('metro_vol', metroVol);
+}
+function initMetroVol() {
+  const sv = parseInt(localStorage.getItem('metro_vol'), 10);
+  if (!isNaN(sv)) metroVol = Math.max(20, Math.min(300, sv));
+  const rng = document.getElementById('metroVol');
+  const lbl = document.getElementById('metroVolVal');
+  if (rng) rng.value = metroVol;
+  if (lbl) lbl.textContent = metroVol + '%';
 }
 // 返回某拍在小结内的重音级别
 function meterAccent(pos) {
@@ -1594,6 +1610,7 @@ function loadDataAndInit(data) {
   }
   selectKeyButton(transposeKey);
   setMetroBpm(metroBpm);
+  initMetroVol();
   setMeter('4/4');
   updateStickyTop();
   render();
@@ -1620,3 +1637,30 @@ fetch('songs.json?t=' + Date.now(), { cache: 'no-store' })
   })
   .catch(err => console.error('加载 songs.json 失败：', err));
 
+
+/* ===== 全屏切换（安卓 Chrome：隐藏系统状态/导航栏，沉浸视奏） ===== */
+function toggleFullscreen() {
+  const el = document.documentElement;
+  const inFs = () => !!(document.fullscreenElement || document.webkitFullscreenElement);
+  try {
+    if (!inFs()) {
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) req.call(el);
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) exit.call(document);
+    }
+  } catch (e) {
+    console.warn('全屏切换失败：', e);
+  }
+}
+function syncFsBtn() {
+  const btn = document.getElementById('fsBtn');
+  if (!btn) return;
+  const inFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  btn.setAttribute('aria-label', inFs ? '退出全屏' : '全屏');
+  btn.title = inFs ? '退出全屏' : '全屏 / 退出全屏';
+  btn.style.opacity = inFs ? '0.35' : '1';
+}
+document.addEventListener('fullscreenchange', syncFsBtn);
+document.addEventListener('webkitfullscreenchange', syncFsBtn);

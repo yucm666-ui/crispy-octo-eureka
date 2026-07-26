@@ -24,7 +24,7 @@
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.6;
@@ -589,7 +589,7 @@
     box-shadow: 0 0 12px rgba(88,166,255,0.4);
   }
   .key-btn.key-orig {
-    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: -apple-system, 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
   }
   .key-btn .orig-tag {
     font-size: 10px;
@@ -613,7 +613,7 @@
     border-radius: 6px;
     color: var(--text);
     font-size: 12px;
-    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: -apple-system, 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     outline: none;
     transition: border-color 0.2s, background 0.2s;
     line-height: 1.5;
@@ -647,7 +647,7 @@
     color: rgba(240,246,252,0.88);
     font-size: 14px;
     font-weight: 500;
-    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    font-family: -apple-system, 'PingFang SC', 'Noto Sans CJK SC', 'Source Han Sans SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
     outline: none;
     transition: background 0.2s;
     line-height: 1.4;
@@ -693,6 +693,10 @@
 .metro-bpm input[type=number]:focus { border-color:var(--accent); }
 .metro-bpm small { font-size:12px; color:var(--text-dim); font-weight:400; }
 .metro input[type=range]{ width:100%; margin:8px 0; accent-color:var(--accent); }
+.metro-vol { display:flex; align-items:center; gap:8px; margin:2px 0 2px; font-size:12px; color:var(--text-dim); }
+.metro-vol-label { white-space:nowrap; }
+.metro-vol input[type=range] { flex:1; margin:0; accent-color:var(--accent); }
+.metro-vol-val { min-width:40px; text-align:right; color:var(--text); font-family:'Consolas','Monaco',monospace; font-weight:700; }
 .metro-meter { margin:6px 0 4px; }
 .metro-meter-label { font-size:11px; color:var(--text-dim); margin-bottom:5px; line-height:1.5; }
 .metro-meter-row { display:flex; flex-direction:column; gap:6px; }
@@ -1051,3 +1055,79 @@
   .detail-body .measure-num { font-size: 30px; }
   .detail-body .measure-chord { font-size: 28px; }
 
+
+/* ============================================================
+   联想小新 Pad Pro 12.7 (TB375FC) 跑场视奏适配
+   仅优化配色与字体：高对比、远距可读、减舞台眩光，不动布局/UI
+   命中：高像素密度平板（横屏≈1472 / 竖屏≈920 CSS px, dpr≈2）；
+        另含 1400–1600px 宽屏条件，方便桌面浏览器拉宽窗口预览
+   ============================================================ */
+@media (min-resolution: 1.5dppx) and (min-width: 800px) and (max-width: 1600px),
+       (min-width: 1400px) and (max-width: 1600px),
+       (min-width: 820px) and (max-width: 1000px) {
+  :root {
+    --bg: #06090d;            /* 更暗，降低舞台灯光下屏幕眩光 */
+    --surface: #0f141b;
+    --surface-hover: #161d27;
+    --border: #28313d;
+    --text: #f2f7ff;          /* 更亮的近白，提整体对比 */
+    --text-dim: #98a4b1;
+    --accent: #79d2ff;        /* 小节号更亮，便于快速定位 */
+    /* 和弦配色整体提亮，舞台一眼可辨 */
+    --key-C: #6db3ff;  --key-G: #4ee36a;  --key-Am: #ffc857;
+    --key-D: #c79bff;   --key-Em: #ff7b72;  --key-F: #5fe0ea;
+    --key-Bm: #ffd965;  --key-A: #ff9ccf;   --key-E: #ff8585;
+    --key-Dm: #6fe6dc;  --key-other: #98a4b1;
+  }
+
+  /* 措施内和弦：跑场时真正盯着读的元素 —— 提亮、加重、加描边 */
+  .measure-chord {
+    color: #5cff7a;           /* 比原 #3fb950 更亮更跳 */
+    font-weight: 700;
+    font-size: 17px;
+    text-shadow: 0 0 1px rgba(0,0,0,0.55);
+  }
+  .measure-num {
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 18px;
+  }
+
+  /* 详情视奏视图：和弦/小节号/歌词显著放大，远距可读 */
+  .detail-body .measure-chord { font-size: 36px; font-weight: 700; }
+  .detail-body .measure-num   { font-size: 32px; font-weight: 800; }
+  .lyrics-input { font-size: 18px; font-weight: 600; }
+
+  /* 歌单/工具栏内和弦标签随新配色提亮（key-* 类用 var 自动生效） */
+  .key-badge { font-weight: 600; }
+}
+
+
+/* ===== 全屏悬浮按钮（右下角，安全区避让） ===== */
+.fs-btn {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 60;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border, #28313d);
+  border-radius: 50%;
+  background: rgba(15, 20, 27, 0.72);
+  color: var(--accent, #79d2ff);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  transition: transform .12s ease, background .12s ease;
+}
+.fs-btn:hover { background: rgba(22, 29, 39, 0.9); }
+.fs-btn:active { transform: scale(0.94); }
+.fs-btn svg { display: block; }
+/* 进入全屏后让按钮更隐蔽，避免遮挡谱面 */
+:fullscreen .fs-btn { opacity: 0.35; }
+:-webkit-full-screen .fs-btn { opacity: 0.35; }
+.fs-btn:hover { opacity: 1; }
