@@ -1075,6 +1075,14 @@
   .detail-body .measure-num   { font-size: 32px; font-weight: 800; }
   .lyrics-input { font-size: 18px; font-weight: 600; }
 
+  /* 和弦对照表展开：与歌曲展开和弦页保持一致的视觉（大字体/高对比/远距可读） */
+  .ref-panel-body .prog-section { gap: 6px; }
+  .ref-panel-body .prog-label { font-size: 18px; font-weight: 700; }
+  .ref-panel-body .prog-measures { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+  .ref-panel-body .measure { padding: 4px 12px 0; }
+  .ref-panel-body .measure-chord { font-size: 36px; font-weight: 700; }
+  .ref-panel-body .measure-num   { font-size: 32px; font-weight: 800; }
+
   /* 歌单/工具栏内和弦标签随新配色提亮（key-* 类用 var 自动生效） */
   .key-badge { font-weight: 600; }
 }
