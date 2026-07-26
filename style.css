@@ -242,7 +242,7 @@
     margin-top: 1px;
   }
   .measure {
-    padding: 2px 4px 3px;
+    padding: 2px 4px 0;   /* 底部留白归零：歌词栏紧贴下方虚线边界 */
     border-bottom: 1px dashed rgba(63,185,80,0.3);
     text-align: center;
     display: flex;
@@ -636,8 +636,9 @@
     margin-top: 1px;
   }
   .lyrics-input {
+    display: block;   /* 消除 inline-block 在歌词 div 内产生的 3px 基线缝隙，让歌词栏底部真正贴边界 */
     width: 100%;
-    padding: 3px 6px;
+    padding: 3px 6px 0;   /* 底部留白归零：歌词栏下方紧贴边界 */
     background: transparent;
     border: none;
     border-left: 1px dashed rgba(88,166,255,0.15);  /* 与和弦小节分割线同色虚线 */
@@ -652,7 +653,7 @@
     line-height: 1.4;
     resize: none;
     overflow: hidden;
-    min-height: 24px;
+    min-height: 22px;   /* 紧贴：去掉空行多出的 2px 框内留白，与下方边界齐 */
     box-sizing: border-box;
     text-align: left;
   }
@@ -769,7 +770,7 @@
   .prog-detail { padding: 10px 16px; gap: 14px; }
   .prog-section { min-width: 140px; }
   .prog-label { font-size: 15px; font-weight: 700; }
-  .measure { padding: 2px 10px; }
+  .measure { padding: 2px 10px 0; }   /* 底部留白归零：歌词栏紧贴下方虚线边界 */
   .measure-num { font-size: 22px; }
   .measure-chord { font-size: 20px; }
   .measure-chord small { font-size: 0.72em; }
@@ -803,7 +804,7 @@
   .prog-measures { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .measure-num { font-size: 26px; letter-spacing: 2px; }
   .measure-chord { font-size: 24px; letter-spacing: 1.5px; }
-  .measure { padding: 3px 10px; }
+  .measure { padding: 3px 10px 0; }   /* 底部留白归零：歌词栏紧贴下方虚线边界 */
   .beat { padding: 2px 4px; }
   .measure-num small { font-size: 0.62em; }
   .measure-chord small { font-size: 0.7em; }
@@ -1046,7 +1047,7 @@
   .detail-body .prog-section { gap: 6px; }
   .detail-body .prog-label { font-size: 18px; font-weight: 700; }
   .detail-body .prog-measures { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
-  .detail-body .measure { padding: 4px 12px; }
+  .detail-body .measure { padding: 4px 12px 0; }   /* 底部留白归零：歌词栏紧贴边界 */
   .detail-body .measure-num { font-size: 30px; }
   .detail-body .measure-chord { font-size: 28px; }
 
