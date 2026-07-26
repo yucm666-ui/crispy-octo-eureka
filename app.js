@@ -649,12 +649,13 @@ let tempList = INITIAL_TEMP.slice();
 
 // ======================== 导出修改指令（供助手回填 HTML）========================
 // 初始快照：在数据加载完成后通过 resetInitSnap() 拍照，导出时做 diff，只导出真正改动的部分。
-const _initSnap = { tempList: [], songs: [], progMap: {}, notes: {} };
+const _initSnap = { tempList: [], songs: [], progMap: {}, notes: {}, lyrics: {} };
 function resetInitSnap() {
   _initSnap.tempList = INITIAL_TEMP.slice();
   _initSnap.songs = JSON.parse(JSON.stringify(songs));
   _initSnap.progMap = JSON.parse(JSON.stringify(progMap));
   _initSnap.notes = JSON.parse(JSON.stringify(_sectionNotes));
+  _initSnap.lyrics = JSON.parse(JSON.stringify(_sectionLyrics));
 }
 const _eq = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -692,6 +693,14 @@ function buildExportData() {
     if (a !== b) noteDiff[k] = a;
   });
   if (Object.keys(noteDiff).length) out.sectionNotes = noteDiff;
+  // 5) 小节歌词：仅改动的小节（key 形如 "歌曲id_模块key_小节序号"）
+  const lyricsDiff = {};
+  const allLyricsKeys = new Set([...Object.keys(_sectionLyrics), ...Object.keys(_initSnap.lyrics)]);
+  allLyricsKeys.forEach(k => {
+    const a = (_sectionLyrics[k] || ''), b = (_initSnap.lyrics[k] || '');
+    if (a !== b) lyricsDiff[k] = a;
+  });
+  if (Object.keys(lyricsDiff).length) out.sectionLyrics = lyricsDiff;
   return out;
 }
 
@@ -699,7 +708,8 @@ function _exportChangeCount(data) {
   return (data.tempList ? 1 : 0)
     + (data.songs ? Object.keys(data.songs).length : 0)
     + (data.progMap ? Object.keys(data.progMap).length : 0)
-    + (data.sectionNotes ? Object.keys(data.sectionNotes).length : 0);
+    + (data.sectionNotes ? Object.keys(data.sectionNotes).length : 0)
+    + (data.sectionLyrics ? Object.keys(data.sectionLyrics).length : 0);
 }
 
 let _lastExportText = '';
@@ -718,6 +728,7 @@ function openExportModal() {
     if (data.songs) parts.push('元信息 ' + Object.keys(data.songs).length + ' 首');
     if (data.progMap) parts.push('和弦/模块 ' + Object.keys(data.progMap).length + ' 首');
     if (data.sectionNotes) parts.push('备注 ' + Object.keys(data.sectionNotes).length + ' 条');
+    if (data.sectionLyrics) parts.push('歌词 ' + Object.keys(data.sectionLyrics).length + ' 小节');
     hint.innerHTML = '检测到改动：<b>' + parts.join(' · ') + '</b>。用下方按钮<b>复制</b>或<b>下载</b>，把这段 JSON 直接发给助手即可回填到文件。';
     _lastExportText = JSON.stringify(data, null, 2);
     ta.value = _lastExportText;
@@ -807,10 +818,18 @@ function saveToGitHub() {
         if (v) mergedNotes[k] = v;
         else delete mergedNotes[k];
       });
+      // 合并歌词：远程为基底 + 本地修改；空值不写入（视为删除）
+      const mergedLyrics = Object.assign({}, remoteData.sectionLyrics || {});
+      Object.keys(_sectionLyrics).forEach(k => {
+        const v = (_sectionLyrics[k] || '').trim();
+        if (v) mergedLyrics[k] = v;
+        else delete mergedLyrics[k];
+      });
       const merged = {
         songs: mergeSongs(remoteData.songs || [], songs),
         progMap: mergeProg(remoteData.progMap || {}, progMap),
-        sectionNotes: mergedNotes
+        sectionNotes: mergedNotes,
+        sectionLyrics: mergedLyrics
       };
       return fetch(SONGS_API, {
         method: 'PUT',
@@ -829,6 +848,9 @@ function saveToGitHub() {
       // 同步备注：用合并后的 sectionNotes 更新内存
       Object.keys(_sectionNotes).forEach(k => { if (!(k in (merged.sectionNotes || {}))) delete _sectionNotes[k]; });
       Object.assign(_sectionNotes, merged.sectionNotes || {});
+      // 同步歌词：用合并后的 sectionLyrics 更新内存
+      Object.keys(_sectionLyrics).forEach(k => { if (!(k in (merged.sectionLyrics || {}))) delete _sectionLyrics[k]; });
+      Object.assign(_sectionLyrics, merged.sectionLyrics || {});
       resetInitSnap();
       render();
       renderRefPanel();
@@ -1562,6 +1584,13 @@ function loadDataAndInit(data) {
     // 先清空再重建：远程为主，本地修改覆盖
     Object.keys(_sectionNotes).forEach(k => { if (!(k in remoteNotes)) delete _sectionNotes[k]; });
     Object.assign(_sectionNotes, remoteNotes, curNotes);
+  }
+  // 合并远程歌词：以远程 sectionLyrics 为基底，叠加本地未保存的修改（逻辑同备注）
+  if (data.sectionLyrics && typeof data.sectionLyrics === 'object') {
+    const remoteLyrics = data.sectionLyrics;
+    const curLyrics = Object.assign({}, _sectionLyrics);
+    Object.keys(_sectionLyrics).forEach(k => { if (!(k in remoteLyrics)) delete _sectionLyrics[k]; });
+    Object.assign(_sectionLyrics, remoteLyrics, curLyrics);
   }
   selectKeyButton(transposeKey);
   setMetroBpm(metroBpm);
