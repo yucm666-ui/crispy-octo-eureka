@@ -157,18 +157,31 @@ function bassLetterToDegreeStr(numToken, origKey) {
   return main + '/' + letterBassToDegree(bass, origKey);
 }
 
-// 渲染一个小节内 N 个拍格（N=拍号分子）。纯顺序定位：每个符号占一拍、从左到右，
-// 空符号（休止）以 "-" 填充。级数(numStr)与和弦(chordStr)按位置一一对应。
+// 渲染一个小节内 N 个拍格（N=拍号分子）。
+// 落拍规则：和弦数 >= 拍数时顺序占位（每拍一个，与原行为一致）；
+// 和弦数 < 拍数时按"均匀分布"定位——和弦 j 落在 floor(j * beats / k) 拍，
+// 例如 4/4 两个和弦落在第1、3拍（而非顺序的第1、2拍），符合和弦谱惯例。
+// 级数(numStr)与和弦(chordStr)按各自符号顺序一一对应，再映射到落拍位置。
 function measureCellsHtml(numStr, chordStr, beats, origKey) {
   const nums = String(numStr == null ? '' : numStr).split('-').map(s => s.trim());
   // 字母串用 splitChordTokens 切分：'-' 是休止符（自身即一个符号），需保留为休止而非分隔符
   const chords = splitChordTokens(chordStr).map(s => s === '-' ? '' : s.trim());
   // 级数行：把字母低音（如 5/E 的 E）按原调换算成级数低音（5/7），使级数行与和弦行结构一致
   const numDegs = nums.map(n => bassLetterToDegreeStr(n, origKey));
+  const k = chords.length;
+  const useEven = k > 0 && k < beats;                 // 和弦少于拍数 → 均匀分布
+  const posOf = (j) => useEven ? Math.floor(j * beats / k) : j;
+  const beatToIdx = {};                               // 落拍位置 -> 和弦序号
+  for (let j = 0; j < k; j++) {
+    if (!chords[j]) continue;                         // 休止（'-'）不参与落拍映射
+    const p = posOf(j);
+    if (beatToIdx[p] === undefined) beatToIdx[p] = j; // 同拍取首个和弦
+  }
   let html = '';
   for (let i = 0; i < beats; i++) {
-    const c = (i < chords.length) ? chords[i] : '';   // 超出符号数则视为休止
-    const nRaw = (c && i < numDegs.length) ? numDegs[i] : '';  // 休止拍不显示级数
+    const j = (beatToIdx[i] !== undefined) ? beatToIdx[i] : -1;
+    const c = j >= 0 ? chords[j] : '';                // 该拍无和弦 → 休止
+    const nRaw = (c && j >= 0 && j < numDegs.length) ? numDegs[j] : '';  // 休止拍不显示级数
     // 级数后缀（sus/maj/min/dim/aug/add 等）用小字；转位 /X 不缩小
     const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/\d+)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
