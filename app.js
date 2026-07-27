@@ -52,23 +52,41 @@ const NOTE_NORM = {
 // 大调音阶各级相对1级的半音数
 const degreeSemitones = {1:0, 2:2, 3:4, 4:5, 5:7, 6:9, 7:11};
 
-// 合并基础和弦名与suffix修饰符（处理 sus4/maj7/m7/M 等重叠）
+// 合并基础和弦名与suffix修饰符（处理 sus4/maj7/m7/M/°/+ 等重叠）
+// 性质遵循现代爵士/流行乐理论标准：maj=大三/大七，m=小三/小七，裸 7/9/13=属和弦（大三+b7），
+// °=减，+=增；dom 为旧式属和弦写法（保留兼容），M 为旧式大三标记（保留兼容）。
 function mergeSuffix(baseChord, suffix) {
   if (!suffix) return baseChord;
   let b = baseChord, s = suffix;
-  // 'M' 或 'maj' 开头 → 大三和弦，去掉基础和弦的 'm'
+  const stripQuality = (x) => x.replace(/dim$/, '').replace(/min$/, '').replace(/aug$/, '').replace(/m$/, '');
+  // 大三/大七：M 或 maj 开头
   if (s.startsWith('M') || s.startsWith('maj')) {
-    b = b.replace(/m$/, '');
-    if (s === 'M') s = '';
+    b = stripQuality(b);
+    if (s === 'M' || s === 'maj') s = '';
   }
-  // 'dom' 开头 → 属和弦：大三和弦（去 m），扩展按属九/属七（b7）处理，如 2dom9→D9、2dom7→D7
-  if (s.startsWith('dom')) {
-    b = b.replace(/m$/, '');
-    s = s.slice(3);
+  // 属七/九/十三：dom 开头，或裸 7/9/13（大三 + b7）
+  if (s.startsWith('dom') || s === '7' || /^7/.test(s) || /^9/.test(s) || /^13/.test(s)) {
+    b = stripQuality(b);
+    if (s.startsWith('dom')) s = s.slice(3);
   }
-  // 基础和弦尾 'm' 和 suffix首 'm' 去重
+  // dom 切完可能剩 M/maj（如 4domM → 4M），再按大三处理
+  if (s === 'M' || s === 'maj') { b = stripQuality(b); s = ''; }
+  // 小三/小七：m 开头（非 maj）→ 基础和弦非小三/减/增时补 m
+  if (s.startsWith('m') && !s.startsWith('maj')) {
+    if (!/(m|min|dim|aug)$/.test(b)) b = b + 'm';
+  }
+  // 减：° 或 dim
+  if (s.startsWith('°') || s.startsWith('dim')) {
+    b = stripQuality(b);
+    s = s.replace(/^dim/, '°');
+  }
+  // 增：+ 或 aug
+  if (s.startsWith('+') || s.startsWith('aug')) {
+    b = stripQuality(b);
+    s = s.replace(/^aug/, '+');
+  }
+  // 基础和弦尾 'm' 与 suffix 首 'm' 去重
   if (b.endsWith('m') && s.startsWith('m')) s = s.slice(1);
-  // 基础和弦尾 'dim' 和 suffix 开头不重复
   return b + s;
 }
 
@@ -120,7 +138,7 @@ function numeratorOf(timeSig) {
 // 把一段和弦字母拆成符号数组（每个符号=1拍）。
 // 规则：'-' 即为一个休止拍；相邻字母按和弦边界切分（如 CG->C,G；DmEm->Dm,Em；C/G 保持整体）。
 function splitChordTokens(str) {
-  const re = /[A-G][#b]*(?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?(?:\/[A-G][#b]*)?/g;
+  const re = /[A-G][#b]*(?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\°|\d+)?(?:\/[A-G][#b]*)?/g;
   const s = String(str == null ? '' : str);
   const out = [];
   let i = 0;
@@ -183,11 +201,11 @@ function measureCellsHtml(numStr, chordStr, beats, origKey) {
     const c = j >= 0 ? chords[j] : '';                // 该拍无和弦 → 休止
     const nRaw = (c && j >= 0 && j < numDegs.length) ? numDegs[j] : '';  // 休止拍不显示级数
     // 级数后缀（sus/maj/min/dim/aug/add 等）用小字；转位 /X 不缩小
-    const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/\d+)?$/,
+    const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\°|\d+)?)(\/\d+)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
     // 和弦字母行同步：转位 /X 不缩小；后缀与度数正则一致（含 [mM]\d*，避免大七 M7 被截断成 M）
     // 大七显示为标准写法：M7→maj7（如 GbM7→Gbmaj7、CM7→Cmaj7），小七 m7 / 属七 7 / maj7 不受影响
-    const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/[A-G][#b]*)?$/,
+    const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\°|\d+)?)(\/[A-G][#b]*)?$/,
       (_, root, suffix, slash) => {
         const disp = suffix ? suffix.replace(/^M(?=\d)/, 'maj') : '';
         return root + (disp ? '<small>' + disp + '</small>' : '') + (slash || '');
@@ -287,10 +305,11 @@ function letterToDegree(token, key) {
   let bass = '', quality = rest;
   const bi = rest.indexOf('/');
   if (bi >= 0) { bass = rest.slice(bi); quality = rest.slice(0, bi); }
-  const qCands = ['', quality, 'M', 'dom' + quality];
+  // 新标准写法优先（maj/°/+），旧式 M/dom 仅作兜底兼容，确保编辑模式产出标准度数
+  const qCands = ['', quality, 'maj', 'dom' + quality];
   // 1) 先试自然音级：直接用 keyChords 根音（兼容 Db/Eb/Ab 等降号调的正确拼法）
   for (let d = 1; d <= 7; d++) {
-    const rRoot = chords[d - 1].replace(/m$/, '').replace(/dim$/, ''); // 取该级顺阶根音
+    const rRoot = chords[d - 1].replace(/dim$/, '').replace(/min$/, '').replace(/aug$/, '').replace(/m$/, ''); // 取该级顺阶根音（先剥 dim/min/aug 再剥 m）
     if ((NOTE_NORM[rRoot] % 12) !== rootPC) continue;
     for (const q of qCands) {
       const test = d + q + bass;
