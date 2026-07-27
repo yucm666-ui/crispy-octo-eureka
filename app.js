@@ -61,6 +61,11 @@ function mergeSuffix(baseChord, suffix) {
     b = b.replace(/m$/, '');
     if (s === 'M') s = '';
   }
+  // 'dom' 开头 → 属和弦：大三和弦（去 m），扩展按属九/属七（b7）处理，如 2dom9→D9、2dom7→D7
+  if (s.startsWith('dom')) {
+    b = b.replace(/m$/, '');
+    s = s.slice(3);
+  }
   // 基础和弦尾 'm' 和 suffix首 'm' 去重
   if (b.endsWith('m') && s.startsWith('m')) s = s.slice(1);
   // 基础和弦尾 'dim' 和 suffix 开头不重复
@@ -265,7 +270,7 @@ function letterToDegree(token, key) {
   let bass = '', quality = rest;
   const bi = rest.indexOf('/');
   if (bi >= 0) { bass = rest.slice(bi); quality = rest.slice(0, bi); }
-  const qCands = ['', quality, 'M'];
+  const qCands = ['', quality, 'M', 'dom' + quality];
   // 1) 先试自然音级：直接用 keyChords 根音（兼容 Db/Eb/Ab 等降号调的正确拼法）
   for (let d = 1; d <= 7; d++) {
     const rRoot = chords[d - 1].replace(/m$/, '').replace(/dim$/, ''); // 取该级顺阶根音
