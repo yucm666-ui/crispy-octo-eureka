@@ -661,7 +661,7 @@ function sectionHtml(s, k, val, label, inEdit) {
     const lyricsVal = getSectionLyrics(s.id, k, idx);
     return '<div class="measure">' +
       '<div class="measure-beats">' + measureCellsHtml(m.num, m.chord, beats, s.key) + '</div>' +
-      '<div class="measure-lyrics" onclick="event.stopPropagation()"><textarea class="lyrics-input" id="lyrics-' + s.id + '-' + k + '-' + idx + '" placeholder="歌词" oninput="autoGrow(this);saveSectionLyrics(' + s.id + ',\'' + k + '\',' + idx + ',this.value)" rows="1">' + escAttr(lyricsVal) + '</textarea></div>' +
+      '<div class="measure-lyrics" onclick="event.stopPropagation()"><textarea class="lyrics-input" id="lyrics-' + s.id + '-' + k + '-' + idx + '" placeholder="歌词" oninput="autoGrow(this);saveSectionLyrics(' + s.id + ',\'' + k + '\',' + idx + ',this.value)" rows="1" cols="1">' + escAttr(lyricsVal) + '</textarea></div>' +
     '</div>';
   }).join('');
   return '<div class="prog-section"><span class="prog-label">' + escAttr(effLabel) + '</span><div class="prog-measures">' + cells + '</div></div>';

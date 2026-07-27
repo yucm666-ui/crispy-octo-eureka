@@ -241,8 +241,9 @@
     margin-bottom: 1px;
   }
   .prog-measures {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+    display: flex;            /* 改流式布局：小节按内容自动定宽，密集小节自然变宽 */
+    flex-wrap: wrap;
+    align-items: stretch;
     gap: 0;
     border-radius: 6px;
     overflow: visible;
@@ -251,6 +252,8 @@
     margin-top: 1px;
   }
   .measure {
+    flex: 0 1 auto;           /* 宽度由内容决定（不强制等宽），容器过窄才收缩 */
+    min-width: 120px;         /* 下限：极简小节不至于被压成一条 */
     padding: 2px 4px 0;   /* 底部留白归零：歌词栏紧贴下方虚线边界 */
     border-bottom: 1px dashed rgba(63,185,80,0.3);
     text-align: center;
