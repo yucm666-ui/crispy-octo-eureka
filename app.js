@@ -120,7 +120,7 @@ function numeratorOf(timeSig) {
 // 把一段和弦字母拆成符号数组（每个符号=1拍）。
 // 规则：'-' 即为一个休止拍；相邻字母按和弦边界切分（如 CG->C,G；DmEm->Dm,Em；C/G 保持整体）。
 function splitChordTokens(str) {
-  const re = /[A-G][#b]*(?:maj\d*|min\d*|m\d*|m|M|dim|aug|sus\d*|add\d*|\+|\d+)?(?:\/[A-G][#b]*)?/g;
+  const re = /[A-G][#b]*(?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?(?:\/[A-G][#b]*)?/g;
   const s = String(str == null ? '' : str);
   const out = [];
   let i = 0;
@@ -185,8 +185,8 @@ function measureCellsHtml(numStr, chordStr, beats, origKey) {
     // 级数后缀（sus/maj/min/dim/aug/add 等）用小字；转位 /X 不缩小
     const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/\d+)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
-    // 和弦字母行同步：转位 /X 不缩小
-    const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:maj\d*|min|m\d*|m|M|dim|aug|sus\d*|add\d*|\+|\d+)?)(\/[A-G][#b]*)?$/,
+    // 和弦字母行同步：转位 /X 不缩小；后缀与度数正则一致（含 [mM]\d*，避免大七 M7 被截断成 M）
+    const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/[A-G][#b]*)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
     html += '<div class="beat' + (c ? ' has-chord' : ' rest') + '">'
       + (nHtml ? '<div class="measure-num">' + nHtml + '</div>' : '')
