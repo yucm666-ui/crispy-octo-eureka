@@ -589,8 +589,10 @@ function getSectionLyrics(id, section, measureIdx) {
 }
 function saveSectionLyrics(id, section, measureIdx, val) {
   const key = id + '_' + section + '_' + measureIdx;
-  if (val && val.trim()) _sectionLyrics[key] = val;
-  else delete _sectionLyrics[key];
+  // 与备注(saveSectionNotes)一致：清空时保留键并置空，而非 delete。
+  // 否则 saveToGitHub 的合并仅遍历 _sectionLyrics 现存键，被删的键不会被清掉，
+  // 导致"网页里删了歌词、保存后 GitHub 上还在"。
+  _sectionLyrics[key] = (val == null) ? '' : val;
 }
 // 备注输入框自动撑高（无下拉条）
 function autoGrow(el) {
