@@ -71,9 +71,11 @@ function mergeSuffix(baseChord, suffix) {
   }
   // dom 切完可能剩 M/maj（如 4domM → 4M），再按大三处理
   if (s === 'M' || s === 'maj') { b = stripQuality(b); s = ''; }
-  // 小三/小七：m 开头（非 maj）→ 基础和弦非小三/减/增时补 m
+  // 小三/小七：m 开头（非 maj）→ 先剥掉已有性质(减/小/增)，再统一加 m，
+  // 避免 F#dim + m7 → F#dim7（应得 F#m7）、F#dim + m → F#dimm（应得 F#m）
   if (s.startsWith('m') && !s.startsWith('maj')) {
-    if (!/(m|min|dim|aug)$/.test(b)) b = b + 'm';
+    b = b.replace(/(dim|min|aug|m)$/, '');
+    b = b + 'm';
   }
   // 减：° 或 dim
   if (s.startsWith('°') || s.startsWith('dim')) {
@@ -306,11 +308,13 @@ function letterToDegree(token, key) {
   const bi = rest.indexOf('/');
   if (bi >= 0) { bass = rest.slice(bi); quality = rest.slice(0, bi); }
   // 新标准写法优先（maj/°/+），旧式 M/dom 仅作兜底兼容，确保编辑模式产出标准度数
-  const qCands = ['', quality, 'maj', 'dom' + quality];
+  const qCands = ['', quality, 'maj', '°7', 'm7b5'];
   // 1) 先试自然音级：直接用 keyChords 根音（兼容 Db/Eb/Ab 等降号调的正确拼法）
   for (let d = 1; d <= 7; d++) {
     const rRoot = chords[d - 1].replace(/dim$/, '').replace(/min$/, '').replace(/aug$/, '').replace(/m$/, ''); // 取该级顺阶根音（先剥 dim/min/aug 再剥 m）
     if ((NOTE_NORM[rRoot] % 12) !== rootPC) continue;
+    // 第7级(导音)的小七/半减七/减小七 → 大调自然音阶里就是半减七 vii°7，标准记法统一为 7°7（避免 domm7 类畸形记号）
+    if (d === 7 && /m7|b5|°/.test(quality)) return '7°7' + bass;
     for (const q of qCands) {
       const test = d + q + bass;
       if (numToChord(test, key) === token) return String(d) + (q || '') + bass;
@@ -323,6 +327,7 @@ function letterToDegree(token, key) {
         const sem = degreeSemitones[d] + (acc === 'b' ? -1 : 1);
         const r = chromaticNotes[(keyIdx + sem + 120) % 12];
         if ((NOTE_NORM[r] % 12) !== rootPC) continue;
+        if (d === 7 && /m7|b5|°/.test(quality)) return acc + '7°7' + bass;
         for (const q of qCands) {
           const test = acc + d + q + bass;
           if (numToChord(test, key) === token) return acc + d + (q || '') + bass;
