@@ -844,7 +844,8 @@ function saveToGitHub() {
         songs: mergeSongs(remoteData.songs || [], songs),
         progMap: mergeProg(remoteData.progMap || {}, progMap),
         sectionNotes: mergedNotes,
-        sectionLyrics: mergedLyrics
+        sectionLyrics: mergedLyrics,
+        tempList: tempList.slice()
       };
       return fetch(SONGS_API, {
         method: 'PUT',
@@ -1607,6 +1608,8 @@ document.getElementById('search').addEventListener('input', e => {
 function loadDataAndInit(data) {
   songs = data.songs || [];
   progMap = data.progMap || {};
+  // 临时歌单：若数据里已保存则采用（覆盖默认 INITIAL_TEMP），否则沿用默认
+  if (Array.isArray(data.tempList)) tempList = data.tempList.slice();
   // 合并远程备注：以远程 sectionNotes 为基底，叠加本地未保存的修改
   if (data.sectionNotes && typeof data.sectionNotes === 'object') {
     // 远程有备注数据，用远程覆盖内置默认值，再叠加当前内存中可能有的新增/修改
