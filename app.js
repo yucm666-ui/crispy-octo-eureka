@@ -186,8 +186,12 @@ function measureCellsHtml(numStr, chordStr, beats, origKey) {
     const nHtml = nRaw ? nRaw.replace(/^([b#]?\d)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/\d+)?$/,
       (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
     // 和弦字母行同步：转位 /X 不缩小；后缀与度数正则一致（含 [mM]\d*，避免大七 M7 被截断成 M）
+    // 大七显示为标准写法：M7→maj7（如 GbM7→Gbmaj7、CM7→Cmaj7），小七 m7 / 属七 7 / maj7 不受影响
     const chordHtml = c ? c.replace(/^([A-G][#b]*)((?:sus\d*|maj\d*|min|dim|aug|add\d*|[mM]\d*|\+|\d+)?)(\/[A-G][#b]*)?$/,
-      (_, root, suffix, slash) => root + (suffix ? '<small>' + suffix + '</small>' : '') + (slash || '')) : '';
+      (_, root, suffix, slash) => {
+        const disp = suffix ? suffix.replace(/^M(?=\d)/, 'maj') : '';
+        return root + (disp ? '<small>' + disp + '</small>' : '') + (slash || '');
+      }) : '';
     html += '<div class="beat' + (c ? ' has-chord' : ' rest') + '">'
       + (nHtml ? '<div class="measure-num">' + nHtml + '</div>' : '')
       + '<div class="measure-chord' + (c ? '' : ' rest-mark') + '">' + (c ? chordHtml : '-') + '</div>'
