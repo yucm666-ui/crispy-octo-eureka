@@ -244,6 +244,11 @@
   </svg>
 </button>
 
+<button class="install-btn" id="installBtn" title="安装到桌面（离线 PWA）" aria-label="安装到桌面">
+  <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3v9m0 0l-4-4m4 4l4-4M5 18v2a2 2 0 002 2h10a2 2 0 002-2v-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <span>安装</span>
+</button>
+
 <script src="app.js"></script>
 
 
@@ -278,5 +283,28 @@
       document.body.appendChild(t);
     }
   }
+  // 页面内"安装到桌面"按钮：捕获原生安装提示，确保 standalone（无网址栏）模式
+  (function () {
+    var btn = document.getElementById('installBtn');
+    var promptEvt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();          // 拦掉 Chrome 自动迷你条，统一走本按钮
+      promptEvt = e;
+      btn.style.display = 'flex';
+    });
+    window.addEventListener('appinstalled', function () {
+      btn.style.display = 'none';
+      promptEvt = null;
+    });
+    btn.addEventListener('click', function () {
+      if (!promptEvt) return;
+      promptEvt.prompt();
+      promptEvt.userChoice.then(function (choice) {
+        if (choice.outcome === 'accepted') { /* 已安装为独立 PWA */ }
+        promptEvt = null;
+        btn.style.display = 'none';
+      });
+    });
+  })();
 </script>
 </body></html>

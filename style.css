@@ -1118,4 +1118,27 @@
 /* 进入全屏后让按钮更隐蔽，避免遮挡谱面 */
 :fullscreen .fs-btn { opacity: 0.35; }
 :-webkit-full-screen .fs-btn { opacity: 0.35; }
+/* 页面内"安装到桌面"按钮：仅在可安装时由 JS 显示 */
+.install-btn {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 60;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 0 15px 0 12px;
+  height: 46px;
+  border: 1px solid var(--border, #28313d);
+  border-radius: 23px;
+  background: rgba(15, 20, 27, 0.72);
+  color: #e6edf3;
+  font: 600 14px/1 sans-serif;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.install-btn svg { display: block; }
+.install-btn:hover { background: rgba(22, 29, 39, 0.92); }
+.install-btn:active { transform: scale(0.96); }
 .fs-btn:hover { opacity: 1; }
