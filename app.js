@@ -810,7 +810,10 @@ const REPO = (() => {
   if (m && repo) return m[1] + '/' + repo;
   return 'yucm666-ui/crispy-octo-eureka';
 })();
-const SONGS_API = 'https://api.github.com/repos/' + REPO + '/contents/songs.json';
+const API_BASE = 'https://api.github.com/repos/' + REPO + '/contents/';
+const SONGS_API = API_BASE + 'songs.json';
+// 逐首分文件路径：songs/<id>.json
+const songApi = (id) => API_BASE + 'songs/' + id + '.json';
 
 // 页面加载时回填已记住的 token
 (function () {
@@ -841,6 +844,194 @@ function mergeProg(remote, mem) {
   return out;
 }
 
+// ======================== 分文件加载 / 保存（songs/<id>.json） ========================
+// 并发限流：把 arr 中每个元素交给 fn，最多同时 limit 个在途
+function mapLimit(arr, limit, fn) {
+  const ret = new Array(arr.length);
+  let i = 0, done = 0;
+  return new Promise((resolve, reject) => {
+    if (!arr.length) return resolve(ret);
+    function next() {
+      if (i >= arr.length) return;
+      const cur = i++;
+      Promise.resolve(fn(arr[cur], cur))
+        .then(v => { ret[cur] = v; if (++done === arr.length) resolve(ret); else next(); })
+        .catch(reject);
+    }
+    const n = Math.min(limit, arr.length);
+    for (let k = 0; k < n; k++) next();
+  });
+}
+
+// 把"索引 + 逐首分文件"重装成 loadDataAndInit 需要的完整结构
+function reassemble(meta, files) {
+  const progMap = {}, sectionNotes = {}, sectionLyrics = {};
+  const out = (meta || []).map(m => {
+    const f = files[m.id];
+    progMap[m.id] = f ? (f.prog || {}) : {};
+    if (f && f.notes) Object.keys(f.notes).forEach(k => {
+      if (f.notes[k]) sectionNotes[m.id + '_' + k] = f.notes[k];
+    });
+    if (f && f.lyrics) Object.keys(f.lyrics).forEach(sec => {
+      (f.lyrics[sec] || []).forEach((line, idx) => { if (line) sectionLyrics[m.id + '_' + sec + '_' + idx] = line; });
+    });
+    return m;
+  });
+  return { songs: out, progMap, sectionNotes, sectionLyrics };
+}
+
+// CDN 加载：索引 + 并行拉取每首分文件
+function fetchJson(url) {
+  return fetch(url, { cache: 'no-store' }).then(r => {
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' @ ' + url);
+    return r.json();
+  });
+}
+
+function loadAll() {
+  fetchJson('songs.json?t=' + Date.now())
+    .then(idx => {
+      const meta = idx.songs || [];
+      return mapLimit(meta.map(m => m.id), 12, id =>
+        fetchJson('songs/' + id + '.json?t=' + Date.now())
+          .then(f => [id, f])
+          .catch(() => [id, null])
+      ).then(pairs => {
+        const files = {};
+        pairs.forEach(p => { if (p && p[1]) files[p[0]] = p[1]; });
+        const data = reassemble(meta, files);
+        data.tempList = idx.tempList || [];
+        loadDataAndInit(data);
+        // 有 token 则用 GitHub API 拉最新（绕过 CDN 缓存延迟）
+        const tok = localStorage.getItem('gh_token');
+        if (tok) refreshFromApi(tok);
+      });
+    })
+    .catch(err => console.error('加载歌单失败：', err));
+}
+
+// 通过 GitHub API 拉取最新（绕过 CDN 缓存）：仅索引 + 远程新增的歌
+// 说明：中国大陆访问 api.github.com 较慢，故只拉索引（拿最新歌单/临时歌单），
+// 并为"CDN 尚未拿到"的远程新增歌曲补拉分文件；其余歌沿用 CDN 已加载的数据（写后 CDN 会很快生效）。
+function getApi(url, token) {
+  return fetch(url, { headers: { 'Authorization': 'token ' + token } }).then(r => {
+    if (!r.ok) throw new Error('API ' + r.status + ' @ ' + url);
+    return r.json();
+  });
+}
+function refreshFromApi(token) {
+  getApi(SONGS_API, token).then(idxRemote => {
+    const idx = JSON.parse(base64ToUtf8(idxRemote.content));
+    const meta = idx.songs || [];
+    const curIds = new Set(songs.map(s => s.id));
+    const newIds = meta.map(m => m.id).filter(id => !curIds.has(id));
+    return mapLimit(newIds, 8, id =>
+      getApi(songApi(id), token)
+        .then(j => [id, JSON.parse(base64ToUtf8(j.content))])
+        .catch(() => [id, null])
+    ).then(pairs => {
+      const files = {};
+      pairs.forEach(p => { if (p && p[1]) files[p[0]] = p[1]; });
+      let changed = false;
+      meta.filter(m => files[m.id]).forEach(m => {
+        const f = files[m.id];
+        songs.push(m);
+        progMap[m.id] = f.prog || {};
+        if (f.notes) Object.keys(f.notes).forEach(k => { if (f.notes[k]) _sectionNotes[m.id + '_' + k] = f.notes[k]; });
+        if (f.lyrics) Object.keys(f.lyrics).forEach(sec => (f.lyrics[sec] || []).forEach((l, i) => { if (l) _sectionLyrics[m.id + '_' + sec + '_' + i] = l; }));
+        changed = true;
+      });
+      if (idx.tempList && Array.isArray(idx.tempList) && JSON.stringify(idx.tempList) !== JSON.stringify(tempList)) {
+        tempList = idx.tempList.slice(); changed = true;
+      }
+      if (changed) { sortSongs(); resetInitSnap(); render(); renderRefPanel(); }
+    });
+  }).catch(() => {}); // 静默失败，沿用 CDN 数据
+}
+
+// 计算相对初始快照发生变化的歌曲 id 集合（决定要写哪些分文件）
+function computeChangedSongIds() {
+  const ids = new Set();
+  const idRe = /^(\d+)_/;
+  // 1) 元信息变更
+  const initById = {};
+  _initSnap.songs.forEach(s => { initById[s.id] = s; });
+  songs.forEach(s => { const o = initById[s.id]; if (!o || !_eq(o, s)) ids.add(s.id); });
+  // 2) 和弦/模块 progMap 变更
+  const allProg = new Set([...Object.keys(progMap), ...Object.keys(_initSnap.progMap)]);
+  allProg.forEach(id => { if (!_eq(progMap[id], _initSnap.progMap[id])) ids.add(Number(id)); });
+  // 3) 段落备注变更（仅值真正变化的歌才计入，避免每次保存都重写所有带备注的歌）
+  const allNoteKeys = new Set([...Object.keys(_sectionNotes), ...Object.keys(_initSnap.notes)]);
+  allNoteKeys.forEach(k => {
+    if ((_sectionNotes[k] || '') !== (_initSnap.notes[k] || '')) {
+      const m = k.match(idRe); if (m) ids.add(Number(m[1]));
+    }
+  });
+  // 4) 小节歌词变更（同上）
+  const allLyricKeys = new Set([...Object.keys(_sectionLyrics), ...Object.keys(_initSnap.lyrics)]);
+  allLyricKeys.forEach(k => {
+    if ((_sectionLyrics[k] || '') !== (_initSnap.lyrics[k] || '')) {
+      const m = k.match(idRe); if (m) ids.add(Number(m[1]));
+    }
+  });
+  return [...ids];
+}
+
+// 由当前内存组装一首歌的分文件内容 {id,name,...,prog,notes,lyrics}
+function buildSongFile(id) {
+  const meta = songs.find(s => s.id === id) || {};
+  const prog = progMap[id] || {};
+  const notes = {};
+  Object.keys(_sectionNotes).forEach(k => {
+    const m = k.match(/^(\d+)_(.+)$/);
+    if (m && Number(m[1]) === id && _sectionNotes[k]) notes[m[2]] = _sectionNotes[k];
+  });
+  const bySec = {};
+  Object.keys(_sectionLyrics).forEach(k => {
+    const m = k.match(/^(\d+)_(.+)_(\d+)$/);
+    if (m && Number(m[1]) === id) {
+      const sec = m[2], n = Number(m[3]);   // n 为 0 基小节号（与原始 app 的 _sectionLyrics 键一致）
+      bySec[sec] = bySec[sec] || {};
+      bySec[sec][n] = _sectionLyrics[k];
+    }
+  });
+  const lyrics = {};
+  Object.keys(bySec).forEach(sec => {
+    // 歌词小节号可能非连续（如只在第 7 小节有词），必须用空串占位保持索引，
+    // 不可压缩重排，否则小节号会整体偏移、错位
+    let maxIdx = -1;
+    Object.keys(bySec[sec]).forEach(k => { const i = Number(k); if (i > maxIdx) maxIdx = i; });
+    if (maxIdx >= 0) {
+      const arr = new Array(maxIdx + 1).fill('');
+      Object.keys(bySec[sec]).forEach(k => { arr[Number(k)] = bySec[sec][k]; });
+      lyrics[sec] = arr;
+    }
+  });
+  return {
+    id: id, name: meta.name || '', artist: meta.artist || '',
+    key: meta.key || '', maleKey: meta.maleKey || '', femaleKey: meta.femaleKey || '',
+    bpm: meta.bpm || '', timeSig: meta.timeSig || '',
+    prog: prog, notes: notes, lyrics: lyrics
+  };
+}
+
+// 写单个分文件：先取 sha 做更新，404（不存在）则不带 sha 新建
+function writeSongFile(id, token) {
+  const content = JSON.stringify(buildSongFile(id), null, 0);
+  return getApi(songApi(id), token)
+    .then(j => writeContentApi(songApi(id), content, j.sha, token, '更新歌曲 #' + id))
+    .catch(() => writeContentApi(songApi(id), content, null, token, '新增歌曲 #' + id));
+}
+function writeContentApi(url, content, sha, token, message) {
+  const body = { message: message, content: utf8ToBase64(content) };
+  if (sha) body.sha = sha;
+  return fetch(url, {
+    method: 'PUT',
+    headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+}
+
 function saveToGitHub() {
   const token = getGhToken();
   const status = document.getElementById('ghSaveStatus');
@@ -850,66 +1041,95 @@ function saveToGitHub() {
   if (btn) btn.disabled = true;
   if (status) { status.textContent = '保存中…'; status.style.color = ''; }
 
-  fetch(SONGS_API, { headers: { 'Authorization': 'token ' + token } })
-    .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-    .then(remote => {
-      const remoteData = JSON.parse(base64ToUtf8(remote.content));
-      // 合并备注：远程为基底 + 本地修改；空值不写入（视为删除）
-      const mergedNotes = Object.assign({}, remoteData.sectionNotes || {});
-      Object.keys(_sectionNotes).forEach(k => {
-        const v = (_sectionNotes[k] || '').trim();
-        if (v) mergedNotes[k] = v;
-        else delete mergedNotes[k];
-      });
-      // 合并歌词：远程为基底 + 本地修改；空值不写入（视为删除）
-      const mergedLyrics = Object.assign({}, remoteData.sectionLyrics || {});
-      Object.keys(_sectionLyrics).forEach(k => {
-        const v = (_sectionLyrics[k] || '').trim();
-        if (v) mergedLyrics[k] = v;
-        else delete mergedLyrics[k];
-      });
-      const merged = {
-        songs: mergeSongs(remoteData.songs || [], songs),
-        progMap: mergeProg(remoteData.progMap || {}, progMap),
-        sectionNotes: mergedNotes,
-        sectionLyrics: mergedLyrics,
-        tempList: tempList.slice()
-      };
-      return fetch(SONGS_API, {
-        method: 'PUT',
-        headers: { 'Authorization': 'token ' + token, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: '更新歌单（网页保存）',
-          content: utf8ToBase64(JSON.stringify(merged, null, 0)),
-          sha: remote.sha
-        })
-      }).then(r2 => { if (!r2.ok) throw new Error('HTTP ' + r2.status); return r2.json(); }).then(() => merged);
-    })
-    .then(merged => {
-      // 保存成功后直接用合并数据更新内存并重新渲染（无需刷新页面，绕过 CDN 缓存）
-      songs = merged.songs;
-      progMap = merged.progMap;
-      // 同步备注：用合并后的 sectionNotes 更新内存
-      Object.keys(_sectionNotes).forEach(k => { if (!(k in (merged.sectionNotes || {}))) delete _sectionNotes[k]; });
-      Object.assign(_sectionNotes, merged.sectionNotes || {});
-      // 同步歌词：用合并后的 sectionLyrics 更新内存
-      Object.keys(_sectionLyrics).forEach(k => { if (!(k in (merged.sectionLyrics || {}))) delete _sectionLyrics[k]; });
-      Object.assign(_sectionLyrics, merged.sectionLyrics || {});
-      resetInitSnap();
-      render();
-      renderRefPanel();
-      if (currentDetailId) renderDetail();
-      if (status) { status.textContent = '✅ 已保存到 GitHub'; status.style.color = '#3fb950'; }
-      if (btn) btn.disabled = false;
-      setTimeout(() => { if (status) status.textContent = ''; }, 4000);
-    })
-    .catch(err => {
-      if (btn) btn.disabled = false;
-      let msg = '保存失败：' + err.message;
-      if (/401|403/.test(err.message)) msg = 'Token 无效或无写权限';
-      else if (/409/.test(err.message)) msg = '远程有更新，请刷新页面后重试';
-      if (status) { status.textContent = msg; status.style.color = '#f85149'; }
+  getApi(SONGS_API, token).then(idxRemote => {
+    const idxSha = idxRemote.sha;
+    const idxData = JSON.parse(base64ToUtf8(idxRemote.content));
+    const remoteSongs = idxData.songs || [];
+    // 1) 仅写入发生变化的歌曲分文件（并发限流）
+    const changedIds = computeChangedSongIds();
+    return mapLimit(changedIds, 6, id =>
+      writeSongFile(id, token).then(() => true).catch(err => { console.warn('歌曲 #' + id + ' 写入失败：', err); return false; })
+    ).then(results => {
+      const failed = results.filter(r => r === false).length;
+      // 2) 写回索引：合并远程（他人新增的歌）与本地，并带上最新临时歌单
+      const newSongs = mergeSongs(remoteSongs, songs);
+      return writeContentApi(SONGS_API, JSON.stringify({ songs: newSongs, tempList: tempList.slice() }), idxSha, token, '更新歌单（网页保存）')
+        .then(() => ({ failed: failed, newSongs: newSongs }));
     });
+  }).then((res) => {
+    // 保存成功：直接更新内存并重新渲染（无需刷新页面，绕过 CDN 缓存）
+    songs = res.newSongs; // 纳入他人可能新增的歌
+    resetInitSnap();
+    render();
+    renderRefPanel();
+    if (currentDetailId) renderDetail();
+    let msg = '✅ 已保存到 GitHub';
+    if (status) status.style.color = '#3fb950';
+    if (res.failed > 0) { msg = '⚠️ 已保存（' + res.failed + ' 首分文件写入失败，请重试）'; if (status) status.style.color = '#d29922'; }
+    if (status) status.textContent = msg;
+    if (btn) btn.disabled = false;
+    setTimeout(() => { if (status) status.textContent = ''; }, 4000);
+  }).catch(err => {
+    if (btn) btn.disabled = false;
+    let msg = '保存失败：' + err.message;
+    if (/401|403/.test(err.message)) msg = 'Token 无效或无写权限';
+    else if (/409/.test(err.message)) msg = '远程有更新，请刷新页面后重试';
+    if (status) { status.textContent = msg; status.style.color = '#f85149'; }
+  });
+}
+
+// ======================== 新增歌曲 ========================
+// 按 id 升序排列内存中的歌曲数组（仅影响索引文件存储顺序；渲染时 render 会另行排序）
+function sortSongs() {
+  songs.sort((a, b) => (a.id || 0) - (b.id || 0));
+}
+// 生成新 id：取当前最大 id + 1
+function nextSongId() {
+  let max = 0;
+  songs.forEach(s => { if (s.id > max) max = s.id; });
+  return max + 1;
+}
+
+// 打开"新增歌曲"弹窗
+function openNewSongModal() {
+  const f = document.getElementById('newSongForm');
+  if (f) f.reset();
+  const idEl = document.getElementById('nsId');
+  if (idEl) idEl.value = nextSongId();
+  document.getElementById('newSongMask').classList.add('open');
+  const nameEl = document.getElementById('nsName');
+  if (nameEl) setTimeout(() => nameEl.focus(), 50);
+}
+function closeNewSongModal() {
+  document.getElementById('newSongMask').classList.remove('open');
+}
+
+// 确认新增：写入内存（歌曲列表 + 空 progMap），重新渲染；保存时再写分文件
+function confirmNewSong() {
+  const id = parseInt(document.getElementById('nsId').value, 10);
+  const name = (document.getElementById('nsName').value || '').trim();
+  if (!name) { alert('请填写歌名'); return; }
+  if (songs.some(s => s.id === id)) { alert('该 id 已存在：' + id); return; }
+  const song = {
+    id: id,
+    name: name,
+    artist: (document.getElementById('nsArtist').value || '').trim(),
+    key: (document.getElementById('nsKey').value || '').trim(),
+    maleKey: (document.getElementById('nsMaleKey').value || '').trim(),
+    femaleKey: (document.getElementById('nsFemaleKey').value || '').trim(),
+    bpm: (document.getElementById('nsBpm').value || '').trim(),
+    timeSig: (document.getElementById('nsTimeSig').value || '').trim()
+  };
+  songs.push(song);
+  progMap[id] = {}; // 暂无和弦，详情页会提示"暂无和弦走向数据"
+  sortSongs();      // 按 id 重新排序，插入到正确位置
+  closeNewSongModal();
+  render();
+  renderRefPanel();
+  // 滚动到新歌并展开，方便立刻编辑和弦
+  const row = document.querySelector('.song-row[data-id="' + id + '"]');
+  if (row && row.scrollIntoView) row.scrollIntoView({ block: 'center' });
+  toggleProg(id);
 }
 
 // 转调：固定初始选调 C（与 HTML 默认高亮一致），不持久化
@@ -1663,25 +1883,8 @@ function loadDataAndInit(data) {
   renderRefPanel();
   resetInitSnap(); // 数据加载完成后拍初始快照，供导出 diff 使用
 }
-fetch('songs.json?t=' + Date.now(), { cache: 'no-store' })
-  .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-  .then(data => {
-    loadDataAndInit(data);
-    // 如果本地存有 token，用 GitHub API 读最新内容覆盖（绕过 CDN 缓存延迟）
-    const tok = localStorage.getItem('gh_token');
-    if (tok) {
-      fetch('https://api.github.com/repos/' + REPO + '/contents/songs.json', {
-        headers: { 'Authorization': 'token ' + tok }
-      })
-        .then(r => { if (!r.ok) throw new Error('API ' + r.status); return r.json(); })
-        .then(remote => {
-          const latest = JSON.parse(base64ToUtf8(remote.content));
-          loadDataAndInit(latest);
-        })
-        .catch(() => {}); // 静默失败，沿用 CDN 数据
-    }
-  })
-  .catch(err => console.error('加载 songs.json 失败：', err));
+// 分文件加载：先读索引 songs.json，再并行拉取每首 songs/<id>.json 并重装
+loadAll();
 
 
 /* ===== 全屏切换（安卓 Chrome：隐藏系统状态/导航栏，沉浸视奏） ===== */

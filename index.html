@@ -35,6 +35,7 @@
     </div>
     <button class="btn outline" title="节拍器" onclick="toggleMetronome()"><span>🎵</span><span>节拍器</span></button>
     <button class="btn outline" title="导出修改 / 保存到GitHub" onclick="openExportModal()"><span>📤</span><span>保存到GitHub</span></button>
+    <button class="btn outline" title="新增一首歌曲" onclick="openNewSongModal()"><span>＋</span><span>新增歌曲</span></button>
   </div>
   <div class="key-bar">
     <span class="key-bar-label">🎼</span>
@@ -235,6 +236,59 @@
         <span id="ghSaveStatus" class="gh-status"></span>
       </div>
     </div>
+  </div>
+</div>
+
+<div class="export-mask" id="newSongMask" onclick="if(event.target===this)closeNewSongModal()">
+  <div class="ns-box">
+    <div class="export-head"><span>＋ 新增歌曲</span><button class="export-x" onclick="closeNewSongModal()">×</button></div>
+    <form class="ns-form" id="newSongForm" onsubmit="return false">
+      <div class="ns-row">
+        <label class="ns-field ns-id">
+          <span>编号 ID</span>
+          <input type="number" id="nsId" min="1" readonly>
+        </label>
+        <label class="ns-field">
+          <span>歌名 <i class="req">*</i></span>
+          <input type="text" id="nsName" placeholder="必填" maxlength="60" autocomplete="off">
+        </label>
+      </div>
+      <div class="ns-row">
+        <label class="ns-field">
+          <span>原唱</span>
+          <input type="text" id="nsArtist" placeholder="如：Beyond" maxlength="40" autocomplete="off">
+        </label>
+        <label class="ns-field">
+          <span>原调</span>
+          <input type="text" id="nsKey" placeholder="如 C / F / Eb" maxlength="6" autocomplete="off">
+        </label>
+      </div>
+      <div class="ns-row">
+        <label class="ns-field">
+          <span>男调</span>
+          <input type="text" id="nsMaleKey" placeholder="可留空" maxlength="6" autocomplete="off">
+        </label>
+        <label class="ns-field">
+          <span>女调</span>
+          <input type="text" id="nsFemaleKey" placeholder="可留空" maxlength="6" autocomplete="off">
+        </label>
+      </div>
+      <div class="ns-row">
+        <label class="ns-field">
+          <span>速度 BPM</span>
+          <input type="text" id="nsBpm" placeholder="可留空" maxlength="4" inputmode="numeric" autocomplete="off">
+        </label>
+        <label class="ns-field">
+          <span>拍号</span>
+          <input type="text" id="nsTimeSig" placeholder="如 4/4" maxlength="5" autocomplete="off">
+        </label>
+      </div>
+      <div class="ns-hint">新增后歌曲会出现在列表末尾，详情页可继续编辑和弦走向；点"保存到 GitHub"才会真正写入仓库。</div>
+      <div class="ns-actions">
+        <button class="btn outline" type="button" onclick="closeNewSongModal()">取消</button>
+        <button class="btn primary" type="button" onclick="confirmNewSong()">添加并展开</button>
+      </div>
+    </form>
   </div>
 </div>
 
