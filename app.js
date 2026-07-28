@@ -888,17 +888,27 @@ function fetchJson(url) {
   });
 }
 
+// 带重试的 fetchJson（最多重试 retries 次，应对 GitHub Pages 偶发 503/429）
+function fetchJsonRetry(url, retries) {
+  return fetchJson(url).catch(err => {
+    if (retries <= 0) throw err;
+    return new Promise(res => setTimeout(res, 300)).then(() => fetchJsonRetry(url, retries - 1));
+  });
+}
+
 function loadAll() {
   fetchJson('songs.json?t=' + Date.now())
     .then(idx => {
       const meta = idx.songs || [];
-      return mapLimit(meta.map(m => m.id), 12, id =>
-        fetchJson('songs/' + id + '.json?t=' + Date.now())
+      return mapLimit(meta.map(m => m.id), 8, id =>
+        fetchJsonRetry('songs/' + id + '.json?t=' + Date.now(), 2)
           .then(f => [id, f])
-          .catch(() => [id, null])
+          .catch(() => [id, null])   // 单首失败不阻断整体加载，该歌暂无和弦数据
       ).then(pairs => {
         const files = {};
-        pairs.forEach(p => { if (p && p[1]) files[p[0]] = p[1]; });
+        let missing = 0;
+        pairs.forEach(p => { if (p && p[1]) files[p[0]] = p[1]; else missing++; });
+        if (missing) console.warn('加载完成，但 ' + missing + ' 首分文件拉取失败（歌曲仍会显示，但和弦可能缺失，可刷新重试）');
         const data = reassemble(meta, files);
         data.tempList = idx.tempList || [];
         loadDataAndInit(data);

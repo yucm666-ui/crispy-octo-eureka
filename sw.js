@@ -1,10 +1,10 @@
 // sw.js — 和弦谱离线 PWA Service Worker
 // 策略：
-//   · 应用外壳（HTML/JS/CSS/manifest/图标）→ CacheFirst，离线秒开
-//   · songs.json（索引）→ NetworkFirst + 缓存回退；剥离 ?t= 时间戳统一作缓存键
-//   · songs/<id>.json（逐首分文件）→ NetworkFirst + 缓存回退；同样剥离 ?t=
-//     使原本每次都带随机时间戳的请求也能命中同一份离线副本，离线可打开任意歌曲
-const CACHE = 'chord-chart-v1';
+//   · 入口代码（index.html/app.js/style.css）→ NetworkFirst（保证拿到最新代码，离线回退缓存）
+//     —— 代码更新频繁，CacheFirst 会锁住旧版导致刷新后行为异常
+//   · 图标/manifest → CacheFirst（不变，离线秒开）
+//   · songs.json（索引）+ songs/<id>.json（逐首分文件）→ NetworkFirst + 缓存回退；剥离 ?t= 时间戳
+const CACHE = 'chord-chart-v2';
 const SHELL = [
   './',
   'index.html',
@@ -14,6 +14,8 @@ const SHELL = [
   'icon-192.png',
   'icon-512.png'
 ];
+// 需要始终拿最新版本的入口代码（NetworkFirst），其余外壳资源走 CacheFirst
+const NET_FIRST = new Set(['index.html', 'app.js', 'style.css', '']);
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -26,7 +28,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))  // 清除所有旧版本缓存（含 v1）
       .then(() => self.clients.claim())
   );
 });
@@ -36,6 +38,8 @@ self.addEventListener('fetch', event => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+  // 只处理同源请求，第三方（如 GitHub API、统计脚本）直接放行
+  if (url.origin !== self.location.origin) return;
 
   // 是否命中"数据文件"（索引 songs.json 或逐首 songs/<id>.json）
   const isData = url.pathname.endsWith('/songs.json') || /^\/songs\/\d+\.json$/.test(url.pathname);
@@ -58,7 +62,28 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // —— 应用外壳：CacheFirst，回退网络 ——
+  // —— 入口代码（HTML/JS/CSS）：NetworkFirst，保证刷新即拿到最新代码 ——
+  const leaf = url.pathname.split('/').pop() || '';
+  if (NET_FIRST.has(leaf)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE);
+      try {
+        const resp = await fetch(req, { cache: 'no-store' });
+        if (resp && resp.ok) cache.put(req, resp.clone());
+        return resp;
+      } catch (err) {
+        const cached = await cache.match(req);
+        if (cached) return cached;            // 离线：回退缓存
+        // 缓存也没有，再试不带查询串的纯净版（外壳预缓存用的是无查询串地址）
+        const cleanResp = await cache.match(url.origin + url.pathname);
+        if (cleanResp) return cleanResp;
+        throw err;
+      }
+    })());
+    return;
+  }
+
+  // —— 其余外壳资源（图标/manifest 等）：CacheFirst，回退网络 ——
   event.respondWith(
     caches.match(req).then(cached => cached || fetch(req).catch(() => caches.match('./')))
   );
