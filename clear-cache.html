@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清理缓存中…</title>
+<style>
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#06090d; color:#e6edf3; font:16px/1.6 -apple-system,system-ui,sans-serif; text-align:center; padding:20px; }
+  .box { max-width:420px; }
+  h1 { font-size:20px; margin:0 0 12px; }
+  .step { margin:8px 0; opacity:.4; transition:opacity .3s; }
+  .step.done { opacity:1; color:#3fb950; }
+  .step.doing { opacity:1; color:#58a6ff; }
+  .step.fail { opacity:1; color:#f85149; }
+  .spin { display:inline-block; width:14px; height:14px; border:2px solid #30363d; border-top-color:#58a6ff; border-radius:50%; animation:r .8s linear infinite; vertical-align:-2px; margin-right:6px; }
+  @keyframes r { to { transform:rotate(360deg); } }
+  .ok { display:none; margin-top:18px; padding:14px; background:#11251c; border:1px solid #238636; border-radius:10px; }
+  .ok.show { display:block; }
+  .btn { display:inline-block; margin-top:14px; padding:12px 28px; background:#238636; color:#fff; text-decoration:none; border-radius:10px; font-size:16px; }
+  .log { margin-top:16px; padding:10px; background:#0d1117; border:1px solid #21262d; border-radius:8px; font:12px/1.5 monospace; text-align:left; max-height:160px; overflow:auto; color:#8b949e; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h1>🧹 清理缓存 & 重置 PWA</h1>
+  <div class="step" id="s1"><span class="spin"></span>注销 Service Worker…</div>
+  <div class="step" id="s2"><span class="spin"></span>清空缓存…</div>
+  <div class="step" id="s3"><span class="spin"></span>清空本地存储…</div>
+  <div class="step" id="s4"><span class="spin"></span>跳转回主页…</div>
+  <div class="ok" id="okBox">
+    <div>✅ 清理完成！正在跳转…</div>
+    <a class="btn" id="goBtn" href="./">点这里手动跳转</a>
+  </div>
+  <div class="log" id="log"></div>
+</div>
+<script>
+(function () {
+  var log = document.getElementById('log');
+  function addLog(msg) { log.textContent += msg + '\n'; log.scrollTop = log.scrollHeight; }
+  function setStep(n, state) {
+    var el = document.getElementById('s' + n);
+    el.className = 'step ' + state;
+    if (state === 'done') el.innerHTML = '✓ ' + el.textContent.replace(/^[\s✓ spinner]+/, '');
+    if (state === 'doing') el.querySelector('.spin') || (el.innerHTML = '<span class="spin"></span>' + el.textContent);
+  }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  addLog('开始清理…');
+
+  // 1. 注销所有 Service Worker
+  setStep(1, 'doing');
+  var swPromise = Promise.resolve();
+  if ('serviceWorker' in navigator) {
+    swPromise = navigator.serviceWorker.getRegistrations().then(function (regs) {
+      addLog('发现 ' + regs.length + ' 个 Service Worker 注册');
+      return Promise.all(regs.map(function (reg) {
+        addLog('注销: ' + (reg.scope || '?'));
+        return reg.unregister().then(function () { addLog('  已注销'); });
+      }));
+    }).catch(function (e) { addLog('SW 注销出错: ' + e.message); });
+  } else {
+    addLog('浏览器不支持 Service Worker，跳过');
+  }
+
+  swPromise.then(function () {
+    setStep(1, 'done');
+
+    // 2. 清空所有 Cache Storage
+    setStep(2, 'doing');
+    var cachePromise = Promise.resolve();
+    if ('caches' in window) {
+      cachePromise = caches.keys().then(function (keys) {
+        addLog('发现 ' + keys.length + ' 个缓存: ' + keys.join(', '));
+        return Promise.all(keys.map(function (k) {
+          addLog('删除缓存: ' + k);
+          return caches.delete(k);
+        }));
+      }).catch(function (e) { addLog('缓存清理出错: ' + e.message); });
+    } else {
+      addLog('浏览器不支持 Cache API，跳过');
+    }
+
+    return cachePromise.then(function () { setStep(2, 'done'); });
+  }).then(function () {
+    // 3. 清空 localStorage / sessionStorage / indexedDB
+    setStep(3, 'doing');
+    try { localStorage.clear(); addLog('localStorage 已清空'); } catch (e) { addLog('localStorage 清空失败: ' + e.message); }
+    try { sessionStorage.clear(); addLog('sessionStorage 已清空'); } catch (e) { addLog('sessionStorage 清空失败: ' + e.message); }
+    // 尝试清 indexedDB（PWA 可能存了数据库）
+    if (window.indexedDB && indexedDB.databases) {
+      indexedDB.databases().then(function (dbs) {
+        dbs.forEach(function (db) {
+          try { indexedDB.deleteDatabase(db.name); addLog('删除 indexedDB: ' + db.name); } catch (e) {}
+        });
+      }).catch(function () {});
+    }
+    setStep(3, 'done');
+
+    // 4. 跳转回主页
+    setStep(4, 'doing');
+    addLog('清理完成，2 秒后跳转…');
+    document.getElementById('okBox').classList.add('show');
+    setTimeout(function () {
+      // 用 replace 避免后退键回到清理页
+      location.replace('./');
+    }, 2000);
+  });
+})();
+</script>
+</body>
+</html>

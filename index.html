@@ -303,9 +303,41 @@
   <span>安装</span>
 </button>
 
+<script>
+  // ★ 自清理机制：访问 ?clear=1 时，注销所有 SW + 清空所有缓存 + 清 localStorage，然后跳回主页
+  // 用于平板等无 F12 设备强制刷新 PWA 缓存（解决旧 SW 锁住旧代码导致歌单消失的问题）
+  (function () {
+    if (location.search.indexOf('clear=1') < 0) return;
+    // 清理模式：显示提示，清理完自动跳回主页。app.js 即使并行加载也无害（马上跳转）
+    document.title = '清理缓存中…';
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#06090d;color:#e6edf3;display:flex;align-items:center;justify-content:center;flex-direction:column;font:16px/1.6 -apple-system,sans-serif;text-align:center;padding:20px';
+    overlay.innerHTML = '<h2 style="margin:0 0 14px">🧹 正在清理缓存…</h2><p id="clrLog" style="font:13px/1.5 monospace;color:#8b949e;max-width:380px;white-space:pre-wrap;margin:0"></p>';
+    (document.body || document.documentElement).appendChild(overlay);
+    var logEl = document.getElementById('clrLog');
+    function log(m) { if (logEl) logEl.textContent += m + '\n'; }
+    function next() { log('✅ 清理完成，正在跳转…'); setTimeout(function () { location.replace(location.pathname); }, 1200); }
+    var tasks = [];
+    if ('serviceWorker' in navigator) {
+      tasks.push(navigator.serviceWorker.getRegistrations().then(function (regs) {
+        log('注销 ' + regs.length + ' 个 Service Worker');
+        return Promise.all(regs.map(function (r) { return r.unregister(); }));
+      }).catch(function (e) { log('SW 注销失败: ' + e.message); }));
+    }
+    if ('caches' in window) {
+      tasks.push(caches.keys().then(function (keys) {
+        log('删除 ' + keys.length + ' 个缓存: ' + keys.join(', '));
+        return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+      }).catch(function (e) { log('缓存清理失败: ' + e.message); }));
+    }
+    try { localStorage.clear(); } catch (e) {}
+    try { sessionStorage.clear(); } catch (e) {}
+    log('本地存储已清空');
+    Promise.all(tasks).then(next, next);
+  })();
+</script>
+
 <script src="app.js"></script>
-
-
 
 <script>
   // 注册 Service Worker，使本页面可作为离线 PWA 安装到安卓平板
