@@ -248,4 +248,35 @@
 
 
 
+<script>
+  // 注册 Service Worker，使本页面可作为离线 PWA 安装到安卓平板
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('sw.js').then(function (reg) {
+        reg.onupdatefound = function () {
+          var installing = reg.installing;
+          if (installing) {
+            installing.onstatechange = function () {
+              if (installing.state === 'installed' && navigator.serviceWorker.controller) {
+                showSwUpdate();
+              }
+            };
+          }
+        };
+      }).catch(function (err) { console.warn('SW 注册失败:', err); });
+    });
+  }
+  // 新版本就绪后提示刷新（避免静默刷新丢失编辑状态）
+  function showSwUpdate() {
+    var t = document.getElementById('swUpdate');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'swUpdate';
+      t.setAttribute('style', 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:9999;background:#1F67FE;color:#fff;padding:10px 14px;border-radius:10px;font:14px/1.4 sans-serif;box-shadow:0 6px 20px rgba(0,0,0,.35);cursor:pointer');
+      t.textContent = '已更新，点击刷新';
+      t.onclick = function () { location.reload(); };
+      document.body.appendChild(t);
+    }
+  }
+</script>
 </body></html>
